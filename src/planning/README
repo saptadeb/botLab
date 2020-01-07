@@ -1,0 +1,61 @@
+=== Files ===
+
+= astar.hpp
+    - declaration for the A* search function
+    - definition of SearchParams struct to customize the A* search
+
+= astar.cpp
+    - definition of the A* search function
+    - you will implement your A* search algorithm in this function
+    
+= astar_test.cpp
+    - a simple test program for checking the results of your A* implementation
+    - you shouldn't need to edit this file
+    
+= exploration.hpp
+    - declaration of the Exploration class that controls the state machine used for exploring an
+      environment
+    - locations are marked in the private section of Exploration where you can add additional code
+      for your implementation
+      
+= exploration.cpp
+    - definition of the Exploration class
+    - the state machine in Exploration is implemented here
+    - you will add code to execute the various states, but the logic for the state machine is
+      implemented for you 
+
+= frontiers.hpp
+    - declaration of function to find frontiers in the map
+    - definition of frontier_t
+    - you shouldn't need to edit this file
+    
+= frontiers.cpp
+    - definition of find_map_frontiers
+    - uses a simple connected components search to find frontiers in the map 
+    - you shouldn't need to edit this file
+    
+= motion_planner.hpp
+    - declaration of MotionPlanner class
+    - handles creation of ObstacleDistanceGrid and maintains search parameters for A*
+    - you shouldn't need to edit this file
+    
+= motion_planner.cpp
+    - definition of MotionPlanner class
+    - you shouldn't need to edit this file
+    
+= obstacle_distance_grid.hpp
+    - declaration of ObstacleDistanceGrid
+    - the public interface is already defined, but you may need to add private methods and/or
+      variables for your implementation
+      
+= obstacle_distance_grid.cpp
+    - definition of ObstacleDistanceGrid
+    - the public interface is implemented here
+    - you'll need to implement your code for growing the obstacles in the map here
+    
+= obstacle_distance_grid_test.cpp
+    - a test program that you can use to see if you are computing the correct distances to obstacles
+      in your ObstacleDistanceGrid implementation
+      
+= planning_channels.h
+    - definition of output channels for the planner classes

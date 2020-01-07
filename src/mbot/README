@@ -1,0 +1,32 @@
+=== Files ===
+
+= drive_square.cpp
+    - implementation of drive_square, which you'll use to test your odometry and motion controller.
+    - you don't need to edit this program, but might find it useful to see how to send commands
+      to the motion_controller.
+
+= mbot_channels.h
+    - definition of input and output messages used by all programs that run on the Mbot
+      
+= motion_controller.cpp
+    - definition of the motion_controller program for the Mbot.
+    - utilizes Rotate-Translate-Rotate process for waypoint navigation.
+    
+= rplidar_driver.cpp
+    - implementation of the driver for talking to the rplidar (works with version 1 & 2 of rplidar).
+    - you won't need to edit this file, but understanding how communication occurs with the rplidar
+      is useful.
+
+= sweep_driver.cpp
+    - implementation of the driver for talking to the sweep lidar.
+    - you won't need to edit this file, but understanding how communication occurs with the sweep lidar
+      is useful.
+      
+= timesync.cpp
+    - implementation of a program that sends a timestamp from the Pi via lcm
+    - necessary for syncing up time between Pi and Beaglebone
+
+= wifi_reader.c
+    - performs an iw scan on surrounding access points. 
+    - publishes signal strengths, MAC address, and SSID of each access point
+      

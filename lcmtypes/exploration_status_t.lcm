@@ -1,0 +1,36 @@
+struct exploration_status_t
+{
+    const int8_t STATE_INITIALIZING = 0;
+    const int8_t STATE_EXPLORING_MAP = 1;
+    const int8_t STATE_RETURNING_HOME = 2;
+    const int8_t STATE_COMPLETED_EXPLORATION = 3;
+    const int8_t STATE_FAILED_EXPLORATION = 4;
+    
+    const int8_t STATUS_IN_PROGRESS = 0;
+    const int8_t STATUS_COMPLETE = 1;
+    const int8_t STATUS_FAILED = 2;
+
+    /*
+    * utime is the time at which the message was generated.
+    */
+    int64_t utime;
+
+    /*
+    * team_number is the assigned team number of the robot sending the messages.
+    */
+    int32_t team_number;
+
+    /**
+    * state is the current exploration state as defined by the possible STATE_ values above. As exploration transitions
+    * between states, it should always indicate when a state has been completed or failed in addition to when it is
+    * in-progress.
+    */
+    int8_t state;
+    
+    /*
+    * status is the current status of exploration within the current state. While working towards completing a task,
+    * the status is STATUS_IN_PROGRESS. Once completed, a message with STATUS_COMPLETE must be sent to tell the scoring
+    * program of the change.
+    */
+    int8_t status;
+}

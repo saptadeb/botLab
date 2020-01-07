@@ -1,0 +1,12 @@
+=== Files ===
+
+NOTE: There are lots of files in here. Only the few that you will need to use are highlighted. You
+      won't need to modify or implement any code in this directory.
+
+= image_u8.h
+    - declaration of the image_u8 type for grayscale images
+    - image_u8 is what you should use for rendering your occupancy grid
+
+= image_u32.h
+    - declaration of image_u32 for color images
+    - image_u32 is what you should use for rendering your obstacle distance grid

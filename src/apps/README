@@ -1,0 +1,21 @@
+=== Directories ===
+
+= botgui/
+    - where botgui is implemented
+    
+= challenge/
+    - where challengegui is implemented
+    
+= utils/
+    - where utility classes and functions for implementing GUIs are located
+    - drawing_functions.cpp is in this directory, which you'll edit for each Task
+
+NOTE: The contents of these subdirectories don't have additional READMEs. The files contained in
+    them should be self-explanatory.
+    
+=== Files ===
+
+= Makefile
+    - the Makefile that builds all of the GUI programs
+    - you shouldn't need to edit this Makefile
+    

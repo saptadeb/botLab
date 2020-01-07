@@ -1,0 +1,73 @@
+=== Files ===
+
+= action_model.hpp
+    - declaration of ActionModel class
+    - the methods you will need to implement are declared here
+    - you will need to add some addition private members for your ActionModel implementation
+    
+= action_model.cpp
+    - definition of Action Model type
+    - you will implement your ActionModel here
+
+= mapping.hpp
+    - declaration of Mapping class
+    - the methods you will need to implement are declared here
+    - you might want to add some private members for your implementation
+    
+= mapping.cpp
+    - definition of Mapping class
+    - you'll implement your occupancy grid mapping algorithm here
+    
+= moving_laser_scan.hpp
+    - declaration of MovingLaserScan class and associated adjusted_ray_t
+    - MovingLaserScan uses linear interpolation between two poses to correct for the motion of the
+      robot while a laser scan was being measured
+    - you will be using this class, but won't need to implement anything
+    
+= moving_laser_scan.cpp
+    - implementation of the code for converting an lidar_t into a MovingLaserScan
+    - you won't need to implement anything here
+    
+= occupancy_grid.hpp
+    - declaration of the OccupancyGrid class
+    - you won't need to implement anything here, but you will use OccupancyGrid extensively
+      throughout this assignment, so understanding the code is essential
+      
+= occupancy_grid.cpp
+    - definition of the OccupancyGrid class
+    - implements the various methods not defined in the class declaration
+    
+= particle_filter.hpp
+    - declaration of ParticleFilter class
+    - the particle filter update is outlined in methods here
+    - you might need to add private members here for your particle filter implementation
+    
+= particle_filter.cpp
+    - definition of ParticleFilter class
+    - the basic update steps for the ParticleFilter are implemented
+    - you will implement the methods needed for actually performing particle filtering here
+    
+= sensor_model.hpp
+    - declaration of SensorModel class
+    - you might need to add private members here for your sensor model implementation
+    
+= sensor_model.cpp
+    - definition of SensorModel class
+    - you will implement your sensor model here
+    
+= slam.hpp
+    - declaration of OccupancyGridSLAM
+    - the overall logic for our SLAM algorithm lives here
+    - you will need to understand class, but shouldn't need to edit anything
+    
+= slam.cpp
+    - definition of OccupancyGridSLAM
+    - you will need to understand this code, but you shouldn't need to edit anything
+
+= slam_channels.h
+    - definition of output channels for the slam program
+    
+= slam_main.cpp
+    - implementation of main function for slam program
+    - runs LCM on one thread and OccupancyGridSLAM on another thread
+    

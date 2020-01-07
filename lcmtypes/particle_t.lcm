@@ -1,0 +1,9 @@
+// particle_t represents a single particle in the particle filter. A particle is represented
+// as the estimated pose, the pose of the parent sample, i.e. the pose the action model was
+// applied to, and the weight as computed by the sensor model.
+struct particle_t
+{
+    pose_xyt_t pose;            // (x,y,theta) pose estimate
+    pose_xyt_t parent_pose;     // (x,y,theta) of the prior pose the new estimate came from
+    double     weight;          // normalized weight of the particle as computed by the sensor model
+}

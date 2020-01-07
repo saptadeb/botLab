@@ -1,0 +1,14 @@
+struct lidar_t
+{
+    int64_t utime;
+
+    // Measured range in meters
+    // Measurement angle in radians
+    // Measurement time was taken in usec
+    // Measurement intensity -- unitless
+    int32_t num_ranges;
+    float   ranges[num_ranges];         // [m]
+    float   thetas[num_ranges];         // [rad]
+    int64_t times[num_ranges];          // [usec]
+    float   intensities[num_ranges];    // no units
+}

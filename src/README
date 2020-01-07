@@ -1,0 +1,50 @@
+=== Directories ===
+
+= apps/
+    - where GUI applications are located
+    - the code for botgui lives here
+    
+= common/
+    - where useful utility functions are defined
+    
+= imagesource/
+    - where a library for using a pointgrey camera is defined
+    
+= lcmtypes/
+    - where the auto-generated code for the LCM messages defined in lcmtypes/ is located
+    
+= mbot/
+    - where the drivers for interfacing with the Mbot are defined
+    - you'll implement your motion_controller code here for task 2, or implement an equivalent using the mobilebot_f17 code
+    
+= optitrack/
+    - where the driver for getting Optitrack data is implemented
+    - you shouldn't need to look in this folder
+    
+= planning/
+    - where the exploration code lives
+    - you'll implement everything for Task 4 here
+    
+= slam/
+    - where the SLAM code lives
+    - you'll implement everything for Task 3 here
+    
+= vx/
+    - where the Vx library code lives
+    - you'll need to understand the basic Vx types, but don't need to understand how Vx works in great detail
+
+=== Files ===
+
+= Makefile
+    - the Makefile that launches the recursive build for each of the above directories
+    - you shouldn't need to edit this file
+    
+= Makefile.lcmgen
+    - the Makefile that handles generating LCM messages defined in lcmtypes/
+    - you don't need to do anything with this file manually. It's called automatically.
+    
+= common.mk
+    - useful Makefile variables definitions
+    - if you add new files for your project, you might need to understand how the build system is
+      defined here
+    

@@ -1,0 +1,14 @@
+struct occupancy_grid_t
+{
+    int64_t utime;
+    
+    float origin_x;
+    float origin_y;
+    
+    float meters_per_cell;
+    int32_t width;
+    int32_t height;
+    int32_t num_cells;
+    
+    int8_t cells[num_cells];
+}

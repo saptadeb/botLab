@@ -1,0 +1,8 @@
+// Receive Confirmation of a particular lcm message
+struct message_received_t
+{
+    int64_t utime;            // Time of confirmation message creation
+
+    int64_t creation_time;    // time of message creation (assumption that this will be unique between messages)
+    string channel; 		  //name of channel 
+}

@@ -1,0 +1,23 @@
+=== Files ===
+
+NOTE: You won't need to edit anything in this folder.
+
+= optitrack.hpp
+    - declaration of interface for communicating with the optitrack server
+    
+= optitrack.cpp
+    - implementation of the interface for receiving data from the optitrack server
+    
+= optitrack_channels.h
+    - definition of all output channels for optitrack_driver
+    
+= optitrack_driver.cpp
+    - implementation of optitrack_driver that receives optitrack information and publishes it as
+      pose_xyt_t
+    - you don't need to edit this file, but will need to use optitrack_driver, so understanding the
+      basics of how it works is useful
+      
+= PacketClient.cpp
+    - code provided with the Optitrack driver for communicating with the Optitrack server.
+    - this code was adapted into optitrack.hpp and optitrack.cpp and isn't used
+    

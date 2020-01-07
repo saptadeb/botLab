@@ -1,0 +1,28 @@
+=== Files ===
+
+NOTE: There are lots of files in here. Only the few that you will need to use are highlighted. You
+      won't need to modify or implement any code in this directory.
+
+= angle_functions.hpp
+    - definition of functions that help perform math on angles. Functions for wrapping quantities to
+      common angle ranges and for adding/subtracting angles are provided.
+
+= grid_utils.hpp
+    - definition of functions for converting between grid and global coordinates. You'll find these
+      very useful for all parts of this assignment.
+      
+= interpolation.hpp
+    - functions for performing linear interpolation of poses.
+    
+= point.hpp
+    - definition of Point class template
+    - definition of useful functions for Points, like distance between points, angle to points, etc.
+    - you should find this class very useful throughout the assignment
+    
+= pose_trace.hpp
+    - declaration of PoseTrace, which maintains a time sequence of poses and automatically performs
+      appropriate linear interpolation of poses at desired times
+    
+= timestamp.h
+    - contains utime_now() function which returns the current system time in microseconds. You
+      should use this function whenever a time value is needed.

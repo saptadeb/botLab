@@ -1,0 +1,14 @@
+// robot_path_t defines a path through the environment as a sequence of poses. The first pose in the sequence is the
+// starting pose of the planned path. The final pose is the goal pose. Each pose is an (x, y, theta) for the robot to
+// reach before moving on to the next pose in the path. The theta associated with each pose points to the next
+// pose in the sequence. Navigation of the path can consist of straight-line driving to the (x, y) position and the
+// turning in-place to the theta orientation, then repeating until the final goal pose has been reached.
+//
+// A path length of 1 contains just the start pose and indicates that no path could be found to the goal.
+struct robot_path_t
+{
+    int64_t utime;                      // Time of path creation
+
+    int32_t path_length;                // Number of poses in the path
+    pose_xyt_t path[path_length];    // Sequence of poses that make up the path
+}

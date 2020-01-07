@@ -1,0 +1,10 @@
+struct mbot_imu_t
+{
+    int64_t utime;
+
+    float gyro[3];
+    float accel[3];
+    float mag[3];
+    float tb_angles[3];
+    float temp;
+}

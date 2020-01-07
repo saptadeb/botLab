@@ -1,0 +1,6 @@
+struct wifi_data_t {     
+    int64_t timestamp;
+    string mac_address; //xx:xx:xx:xx:xx:xx
+    string ssid;
+    float   strength; //in dbm
+    }

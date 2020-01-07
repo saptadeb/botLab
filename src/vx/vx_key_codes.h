@@ -1,0 +1,154 @@
+#ifndef VX_KEYCODES_H
+#define VX_KEYCODES_H
+
+// Vx key codes are designed to have a one-to-one mapping
+// between any character you can type with a standard ascii
+// keyboard. This is in contrast to java, which attempts to map physical
+// keys but skip some symbols like ? and %
+// Where possible, the keycode for a key is its ascii code, which
+// eliminates the need to call a conversion function to get the
+// appearance.
+
+#define VX_KEY_ESC 0x0100
+#define VX_KEY_TAB 0x0009
+#define VX_KEY_ENTER 0x000a
+#define VX_KEY_BACKSPACE 0x0008
+#define VX_KEY_SPACE 0x0020
+#define VX_KEY_SHIFT 0x0101
+#define VX_KEY_CTRL 0x0102
+#define VX_KEY_CAPS_LOCK 0x0103
+#define VX_KEY_NUM_LOCK 0x0104
+#define VX_KEY_ALT 0x0105
+#define VX_KEY_INS 0x0106
+#define VX_KEY_DEL 0x0107
+#define VX_KEY_HOME 0x0108
+#define VX_KEY_END 0x0109
+#define VX_KEY_PAGE_UP 0x010a
+#define VX_KEY_PAGE_DOWN 0x010b
+#define VX_KEY_LEFT 0x010c
+#define VX_KEY_RIGHT 0x010d
+#define VX_KEY_DOWN 0x010e
+#define VX_KEY_UP 0x010f
+#define VX_KEY_TILDE 0x007e
+#define VX_KEY_QUOTE_RIGHT 0x0027
+#define VX_KEY_QUOTE_LEFT 0x0060
+#define VX_KEY_QUOTE_DBL 0x0022
+#define VX_KEY_EXCLAMATION 0x0021
+#define VX_KEY_AT 0x0040
+#define VX_KEY_HASH 0x0023
+#define VX_KEY_DOLLAR 0x0024
+#define VX_KEY_PERCENT 0x0025
+#define VX_KEY_HAT 0x005e
+#define VX_KEY_AMPERSAND 0x0026
+#define VX_KEY_ASTERISK 0x002a
+#define VX_KEY_PAREN_LEFT 0x0028
+#define VX_KEY_PAREN_RIGHT 0x0029
+#define VX_KEY_MINUS 0x002d
+#define VX_KEY_UNDERSCORE 0x005f
+#define VX_KEY_EQUALS 0x003d
+#define VX_KEY_PLUS 0x002b
+#define VX_KEY_BRACE_LEFT 0x007b
+#define VX_KEY_BRACE_RIGHT 0x007d
+#define VX_KEY_BRACKET_LEFT 0x005b
+#define VX_KEY_BRACKET_RIGHT 0x005d
+#define VX_KEY_BACKSLASH 0x005c
+#define VX_KEY_BAR 0x007c
+#define VX_KEY_SEMICOLON 0x003b
+#define VX_KEY_COLON 0x003a
+#define VX_KEY_COMMA 0x002c
+#define VX_KEY_PERIOD 0x002e
+#define VX_KEY_LESS 0x003c
+#define VX_KEY_GREATER 0x003e
+#define VX_KEY_SLASH 0x002f
+#define VX_KEY_QUESTION 0x003f
+#define VX_KEY_A 0x0041
+#define VX_KEY_B 0x0042
+#define VX_KEY_C 0x0043
+#define VX_KEY_D 0x0044
+#define VX_KEY_E 0x0045
+#define VX_KEY_F 0x0046
+#define VX_KEY_G 0x0047
+#define VX_KEY_H 0x0048
+#define VX_KEY_I 0x0049
+#define VX_KEY_J 0x004a
+#define VX_KEY_K 0x004b
+#define VX_KEY_L 0x004c
+#define VX_KEY_M 0x004d
+#define VX_KEY_N 0x004e
+#define VX_KEY_O 0x004f
+#define VX_KEY_P 0x0050
+#define VX_KEY_Q 0x0051
+#define VX_KEY_R 0x0052
+#define VX_KEY_S 0x0053
+#define VX_KEY_T 0x0054
+#define VX_KEY_U 0x0055
+#define VX_KEY_V 0x0056
+#define VX_KEY_W 0x0057
+#define VX_KEY_X 0x0058
+#define VX_KEY_Y 0x0059
+#define VX_KEY_Z 0x005a
+#define VX_KEY_a 0x0061
+#define VX_KEY_b 0x0062
+#define VX_KEY_c 0x0063
+#define VX_KEY_d 0x0064
+#define VX_KEY_e 0x0065
+#define VX_KEY_f 0x0066
+#define VX_KEY_g 0x0067
+#define VX_KEY_h 0x0068
+#define VX_KEY_i 0x0069
+#define VX_KEY_j 0x006a
+#define VX_KEY_k 0x006b
+#define VX_KEY_l 0x006c
+#define VX_KEY_m 0x006d
+#define VX_KEY_n 0x006e
+#define VX_KEY_o 0x006f
+#define VX_KEY_p 0x0070
+#define VX_KEY_q 0x0071
+#define VX_KEY_r 0x0072
+#define VX_KEY_s 0x0073
+#define VX_KEY_t 0x0074
+#define VX_KEY_u 0x0075
+#define VX_KEY_v 0x0076
+#define VX_KEY_w 0x0077
+#define VX_KEY_x 0x0078
+#define VX_KEY_y 0x0079
+#define VX_KEY_z 0x007a
+#define VX_KEY_0 0x0030
+#define VX_KEY_1 0x0031
+#define VX_KEY_2 0x0032
+#define VX_KEY_3 0x0033
+#define VX_KEY_4 0x0034
+#define VX_KEY_5 0x0035
+#define VX_KEY_6 0x0036
+#define VX_KEY_7 0x0037
+#define VX_KEY_8 0x0038
+#define VX_KEY_9 0x0039
+#define VX_KEY_F1 0x0110
+#define VX_KEY_F2 0x0111
+#define VX_KEY_F3 0x0112
+#define VX_KEY_F4 0x0113
+#define VX_KEY_F5 0x0114
+#define VX_KEY_F6 0x0115
+#define VX_KEY_F7 0x0116
+#define VX_KEY_F8 0x0117
+#define VX_KEY_F9 0x0118
+#define VX_KEY_F10 0x0119
+#define VX_KEY_F11 0x011a
+#define VX_KEY_F12 0x011b
+#define VX_KEY_F13 0x011c
+#define VX_KEY_F14 0x011d
+#define VX_KEY_F15 0x011e
+#define VX_KEY_F16 0x011f
+#define VX_KEY_F17 0x0120
+#define VX_KEY_F18 0x0121
+#define VX_KEY_F19 0x0122
+#define VX_KEY_F20 0x0123
+#define VX_KEY_F21 0x0124
+#define VX_KEY_F22 0x0125
+#define VX_KEY_F23 0x0126
+#define VX_KEY_F24 0x0127
+#define VX_KEY_WINDOWS 0x0128
+#define VX_KEY_UNKNOWN 0xfefe
+
+
+#endif

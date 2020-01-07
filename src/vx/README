@@ -1,0 +1,70 @@
+=== Directories ===
+
+You shouldn't need any code defined in the subdirectories. They deal with internal implementation
+details that you don't need to worry about. However, if you are lost as far as how some vxo_* objects
+are defined, you can look at example programs in gtk/.
+
+=== Files ===
+
+NOTE: Vx can be obscure and obtuse. Documentation is sparse at best. The files of most interest to you
+are:
+
+= vxo_*
+    - these files define the various shapes and types of objects that can be created and drawn using
+      Vx. However, the function declarations often use macros, so refer to the Vx tutorial or the
+      examples in the gtk/ subdirectory to find exactly what parameters are needed.
+
+
+======================== Here is the provided README that comes with Vx ============================
+      
+= Introduction =
+
+ Vx is a visualization library designed for robotics applications. It
+ provides a wrapper around OpenGL to make GUIs quick and easy to
+ create.  Vx is designed to be used in multiple languages, including C
+ and Java. In C, Vx is designed to ease the burden of memory mangement
+ by letting the Vx core do most of the work using a reference counting
+ scheme. Vx, similar to its predecessors vis 1 & 2, allows quickly
+ generating a dynamic scene by placing objects (e.g boxes, cylinders,
+ robots, etc) at various places in a 3D environment.
+
+== User Guide ==
+
+ Drawing to screen with Vx roughly consists of 2 parts, the first is
+ some boilerplate to setup the drawing environment, and the second is
+ the actual drawing by adding objects to a vx_world.
+
+=== drawable objects ===
+
+ The highest-level vx drawing api is a collection of "drawable
+ objects", such as boxes and cylinders. Drawable objects have the
+ prefix "vxo_", and all drawable objects can be included from
+ "vxo_drawables.h"
+
+=== vx_world ===
+
+ A vx_world provides the ability to add drawable objects to a series
+ of named double buffers. You can get a buffer with
+ vx_world_get_buffer(), and you can add objects to the buffer using
+ the vx_buffer_add_back(). To make the objects appear, you must 'swap'
+ the buffer by calling vx_buffer_swap()
+
+ If you maintain a reference to a vx_world_t, you can get buffers and
+ add objects at any time, in any thread. This allows you to update the
+ position of a robot whenever you receive a new position update (as an
+ example).
+
+=== vx_application and vx_display ===
+
+ In order for the objects added to a world to be displayed on screen,
+ users must create a vx_application_t, which will provide callbacks
+ for when a display becomes available (for example when a tablet
+ connects remotely). During this callback, a user can connect their
+ vx_world_t to a vx_display_t by adding a "vx_layer" which routes
+ drawing commands from the world to the display.
+
+ Vx users will generally use this work flow:
+  1) create a vx_world
+  2) create a vx_application_t and pass to a gtk display source
+     a) whenever a display connects, make a new vx_layer connecting the world to the display
+  3) when something needs to be drawn to screen, update a buffer in the world.
