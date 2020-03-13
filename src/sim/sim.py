@@ -1,11 +1,15 @@
 import pygame
 from map import Map
+from mbot import Mbot
+import math
 from pygame.locals import *
 
 class Gui:
     def __init__(self):
         self._running = True
         self._display_surf = None
+        self._map = None
+        self._mbot = Mbot()
         self._size = self._width, self._height = 640, 400
 
     def on_init(self):
@@ -26,10 +30,13 @@ class Gui:
             self._running = False
 
     def on_loop(self):
-        pass
+        self._mbot._pose.theta += 0.001
+        self._mbot._pose.x += 0.1 * math.cos(-self._mbot._pose.theta)
+        self._mbot._pose.y += 0.1 * math.sin(-self._mbot._pose.theta)
 
     def on_render(self):
-        pass
+        self._mbot.render(self._display_surf)
+        pygame.display.flip()
 
     def on_cleanup(self):
         pygame.quit()
