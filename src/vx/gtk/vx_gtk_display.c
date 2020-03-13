@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include <gdk/gdkkeysyms.h>
+#include <inttypes.h>
 
 #include "vx/vx_event_handler.h"
 #include "vx/vx_camera_pos.h"
