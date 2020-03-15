@@ -47,13 +47,13 @@ class Gui:
 
     def on_loop(self):
         msg = mbot_motor_command_t()
-        msg.trans_v = 1.0
+        msg.trans_v = 0.01
         msg.angular_v = 0.1
         self._lcm.publish('MBOT_MOTOR_COMMAND', msg.encode())
 
     def on_render(self):
         self._sprites.clear(self._display_surf, self._map.image)
-        self._sprites.update()
+        self._sprites.update(self._space_converter)
         self._sprites.draw(self._display_surf)
         pygame.display.flip()
 
