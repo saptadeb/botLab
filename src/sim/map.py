@@ -3,9 +3,7 @@ import math
 
 
 class Map:
-    def __init__(self, draw_width=640, draw_height=480):
-        self._draw_width = draw_width
-        self._draw_height = draw_height
+    def __init__(self):
         self._occupied_cells = []
         self._global_origin_x = 0
         self._global_origin_y = 0
@@ -14,21 +12,41 @@ class Map:
         self._meters_per_cell = 0.05
         self.image = None
 
+    """ Properties """
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return self._height
+
+    @property
+    def meters_per_cell(self):
+        return self._meters_per_cell
+
+    @property
+    def occupied_cells(self):
+        return list(self._occupied_cells)
+
     """ GUI """
 
-    def render(self):
+    def render(self, space_converter):
         # Calculate cell size
-        cell_width = math.ceil(self._draw_width / self._width)
-        cell_height = math.ceil(self._draw_height / self._height)
+        cell_size = space_converter.to_pixel(self._meters_per_cell)
 
         # Draw the map on a new surface
-        self.image = pygame.Surface((self._draw_width, self._draw_height))
+        width = space_converter.to_pixel(self._meters_per_cell * self._width)
+        height = space_converter.to_pixel(self._meters_per_cell * self._height)
+        self.image = pygame.Surface((width, height))
         # Draw the background white
         self.image.fill((255, 255, 255))
         # Draw occupied cells
         for index in self._occupied_cells:
             row, col = self.index_to_row_col(index)
-            rect = pygame.Rect(col * cell_width, row * cell_height, cell_width, cell_height)
+            left = space_converter.to_pixel(col * self._meters_per_cell)
+            top = space_converter.to_pixel(row * self._meters_per_cell)
+            rect = pygame.Rect(left, top, cell_size, cell_size)
             pygame.draw.rect(self.image, (0, 0, 0), rect)
 
         return self.image

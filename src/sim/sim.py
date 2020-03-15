@@ -3,6 +3,7 @@ from map import Map
 from mbot import Mbot
 from timing import Rate
 from lidar import Lidar
+from geometry import SpaceConverter
 import math
 from pygame.locals import *
 import sys
@@ -16,13 +17,14 @@ class Gui:
         self._running = True
         self._display_surf = None
         self._map = None
-        self._size = self._width, self._height = 640, 400
+        self._size = self._width, self._height = 640, 400 * 2
         self._sprites = pygame.sprite.RenderUpdates()
         self._mbot = Mbot()
         self._sprites.add(self._mbot)
         self._frame_rate = 50
         self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
         self._lidar = Lidar()
+        self._space_converter = None
 
     def on_init(self):
         # Pygame
@@ -30,9 +32,10 @@ class Gui:
         pygame.display.set_mode(self._size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._display_surf = pygame.display.get_surface()
         # Map
-        self._map = Map(self._width, self._height)
+        self._map = Map()
         self._map.load_from_file('../../data/astar/maze.map')
-        self._display_surf.blit(self._map.render(), (0, 0))
+        self._space_converter = SpaceConverter(self._map.meters_per_cell * self._map.width / self._width)
+        self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
         # Start
         self._running = True
