@@ -12,6 +12,7 @@ class Map:
         self._width = 10
         self._height = 10
         self._meters_per_cell = 0.05
+        self.image = None
 
     """ GUI """
 
@@ -21,16 +22,16 @@ class Map:
         cell_height = math.ceil(self._draw_height / self._height)
 
         # Draw the map on a new surface
-        image = pygame.Surface((self._draw_width, self._draw_height))
+        self.image = pygame.Surface((self._draw_width, self._draw_height))
         # Draw the background white
-        image.fill((255, 255, 255))
+        self.image.fill((255, 255, 255))
         # Draw occupied cells
         for index in self._occupied_cells:
             row, col = self.index_to_row_col(index)
             rect = pygame.Rect(col * cell_width, row * cell_height, cell_width, cell_height)
-            pygame.draw.rect(image, (0, 0, 0), rect)
+            pygame.draw.rect(self.image, (0, 0, 0), rect)
 
-        return image
+        return self.image
 
     """ File I/O """
 

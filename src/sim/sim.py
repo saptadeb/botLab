@@ -9,8 +9,10 @@ class Gui:
         self._running = True
         self._display_surf = None
         self._map = None
-        self._mbot = Mbot()
         self._size = self._width, self._height = 640, 400
+        self._sprites = pygame.sprite.RenderUpdates()
+        self._mbot = Mbot()
+        self._sprites.add(self._mbot)
 
     def on_init(self):
         # Pygame
@@ -35,7 +37,9 @@ class Gui:
         self._mbot._pose.y += 0.1 * math.sin(-self._mbot._pose.theta)
 
     def on_render(self):
-        self._mbot.render(self._display_surf)
+        self._sprites.clear(self._display_surf, self._map.image)
+        self._sprites.update()
+        self._sprites.draw(self._display_surf)
         pygame.display.flip()
 
     def on_cleanup(self):
