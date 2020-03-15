@@ -2,6 +2,7 @@ import pygame
 from map import Map
 from mbot import Mbot
 from timing import Rate
+from lidar import Lidar
 import math
 from pygame.locals import *
 import sys
@@ -21,6 +22,7 @@ class Gui:
         self._sprites.add(self._mbot)
         self._frame_rate = 50
         self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
+        self._lidar = Lidar()
 
     def on_init(self):
         # Pygame
@@ -34,6 +36,7 @@ class Gui:
         pygame.display.flip()
         # Start
         self._running = True
+        self._lidar.start()
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
