@@ -4,6 +4,10 @@ from mbot import Mbot
 from timing import Rate
 import math
 from pygame.locals import *
+import sys
+import lcm
+sys.path.append('../lcmtypes')
+from mbot_motor_command_t import mbot_motor_command_t
 
 
 class Gui:
@@ -16,6 +20,7 @@ class Gui:
         self._mbot = Mbot()
         self._sprites.add(self._mbot)
         self._frame_rate = 50
+        self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
 
     def on_init(self):
         # Pygame
@@ -35,9 +40,10 @@ class Gui:
             self._running = False
 
     def on_loop(self):
-        self._mbot._pose.theta += 0.1
-        self._mbot._pose.x += 1 * math.cos(-self._mbot._pose.theta)
-        self._mbot._pose.y += 1 * math.sin(-self._mbot._pose.theta)
+        msg = mbot_motor_command_t()
+        msg.trans_v = 1.0
+        msg.angular_v = 0.1
+        self._lcm.publish('MBOT_MOTOR_COMMAND', msg.encode())
 
     def on_render(self):
         self._sprites.clear(self._display_surf, self._map.image)
