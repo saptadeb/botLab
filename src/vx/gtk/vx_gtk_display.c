@@ -1,3 +1,4 @@
+#include <inttypes.h> // for PRIu64
 #include <assert.h>
 #include <pthread.h>
 #include <stdio.h>
