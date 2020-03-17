@@ -12,6 +12,7 @@ OccupancyGridSLAM::OccupancyGridSLAM(int         numParticles,
                                      lcm::LCM&   lcmComm,
                                      bool waitForOptitrack,
                                      bool mappingOnlyMode,
+                                     bool actionOnlyMode,
                                      const std::string localizationOnlyMap)
 : mode_(full_slam)  // default is running full SLAM, unless user specifies otherwise on the command line
 , haveInitializedPoses_(false)
@@ -36,8 +37,12 @@ OccupancyGridSLAM::OccupancyGridSLAM(int         numParticles,
     {
         haveMap_ = map_.loadFromFile(localizationOnlyMap);
         assert(haveMap_);   // if there's no map, then the localization can't run!
-        
-        mode_ = localization_only;
+        if(actionOnlyMode){
+            mode_ = action_only;
+        }
+        else{
+            mode_ = localization_only;
+        }
     }
     
     currentOdometry_.utime = 0;
@@ -250,7 +255,12 @@ void OccupancyGridSLAM::updateLocalization(void)
     if(haveMap_ && (mode_ != mapping_only))
     {
         previousPose_ = currentPose_;
-        currentPose_  = filter_.updateFilter(currentOdometry_, currentScan_, map_);//, v_, omega_, utime_); //remove last 3 args for odo
+        if(mode_ == action_only){
+            currentPose_  = filter_.updateFilterActionOnly(currentOdometry_);
+        }
+        else{
+            currentPose_  = filter_.updateFilter(currentOdometry_, currentScan_, map_);
+        }
         
         auto particles = filter_.particles();
 
@@ -263,7 +273,7 @@ void OccupancyGridSLAM::updateLocalization(void)
 
 void OccupancyGridSLAM::updateMap(void)
 {
-    if(mode_ != localization_only)
+    if(mode_ != localization_only || mode_ != action_only)
     {
         // Process the map
         mapper_.updateMap(currentScan_, currentPose_, map_);

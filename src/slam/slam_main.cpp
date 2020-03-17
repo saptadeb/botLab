@@ -12,6 +12,7 @@ int main(int argc, char** argv)
     const char* kMissOddsArg = "miss-odds";
     const char* kUseOptitrackArg = "use-optitrack";
     const char* kMappingOnlyArg = "mapping-only";
+        const char* kActionOnlyArg = "action-only";
     const char* kLocalizationOnlyArg = "localization-only";
     
     // Handle Options
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
     getopt_add_int(gopt, '\0', kMissOddsArg, "1", "Amount to decrease log-odds when a cell is passed through by a laser ray");
     getopt_add_bool(gopt, '\0', kUseOptitrackArg, 0, "Flag indicating if the map reference frame should be set to the Optitrack reference frame.");
     getopt_add_bool(gopt, '\0', kMappingOnlyArg, 0, "Flag indicating if mapping-only mode should be run");
+    getopt_add_bool(gopt, '\0', kActionOnlyArg, 0, "Flag indicating if action-only mode should be run");
     getopt_add_string(gopt, '\0', kLocalizationOnlyArg, "", "Localization only mode should be run. Name of map to use is provided.");
     
     if (!getopt_parse(gopt, argc, argv, 1) || getopt_get_bool(gopt, "help")) {
@@ -35,6 +37,7 @@ int main(int argc, char** argv)
     int missOdds = getopt_get_int(gopt, kMissOddsArg);
     bool useOptitrack = getopt_get_bool(gopt, kUseOptitrackArg);
     bool mappingOnly = getopt_get_bool(gopt, kMappingOnlyArg);
+    bool actionOnly = getopt_get_bool(gopt, kActionOnlyArg);
     std::string localizationMap = getopt_get_string(gopt, kLocalizationOnlyArg);
 
     signal(SIGINT, exit);  
@@ -46,7 +49,8 @@ int main(int argc, char** argv)
                            missOdds, 
                            lcmConnection, 
                            useOptitrack, 
-                           mappingOnly, 
+                           mappingOnly,
+                           actionOnly,
                            localizationMap);
     
     std::thread slamThread([&slam]() {

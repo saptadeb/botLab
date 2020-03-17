@@ -277,10 +277,10 @@ void BotGui::render(void)
     }
     
     // If the SLAM_POSE has been assigned a color, then draw it using that color
-    if(traces_.find(SLAM_POSE_CHANNEL) != traces_.end())
-    {
-        draw_robot(slamPose_, traces_[SLAM_POSE_CHANNEL].color, traces_[SLAM_POSE_CHANNEL].body_color, poseBuf);
-    }
+    //if(traces_.find(SLAM_POSE_CHANNEL) != traces_.end())
+    //{
+    //    draw_robot(slamPose_, traces_[SLAM_POSE_CHANNEL].color, traces_[SLAM_POSE_CHANNEL].body_color, poseBuf);
+    //}
     vx_buffer_swap(poseBuf);
    
     

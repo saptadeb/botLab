@@ -129,15 +129,16 @@ void draw_particles(const particles_t& particles, vx_buffer_t* buffer)
     {  
       particle_plot[2*i] = temp.pose.x;   
       particle_plot[2*i + 1] = temp.pose.y;
-      particle_color[4*i] = 255;
-      particle_color[4*i + 1] = particle_color[4*i + 2] = 0;
-      particle_color[4*i + 3] = temp.weight * 255;
+      particle_color[4*i] = 255 * temp.weight;      //red
+      particle_color[4*i + 1] = 0;    //green
+      particle_color[4*i + 2] = -255*temp.weight + 255;    //blue
+      particle_color[4*i + 3] = 255;  //alpha
       i++;
     }  
     
     vx_resc_t *colors = vx_resc_copyf(particle_color, total_points*4);
     vx_resc_t *estimated_poses = vx_resc_copyf(particle_plot, total_points*2);
-    vx_buffer_add_back(buffer, vxo_points(estimated_poses, total_points, vxo_points_style_multi_colored(colors, 5.0f)));
+    vx_buffer_add_back(buffer, vxo_points(estimated_poses, total_points, vxo_points_style_multi_colored(colors, 2.5f)));
 }
 
 
@@ -153,13 +154,10 @@ void draw_path(const robot_path_t& path, const float* color, vx_buffer_t* buffer
     // Draw the path as line segments between target poses, which are drawn as little robots
     for(auto& pose : path.path)
     {
-        float wypnt_color[] ={ 0.0f, 1.0f, 1.0f, 0.4f}; //Define waypoints with clear cyan color
+        float wypnt_color[] ={ 0.0f, 0.5f, 0.0f, 1.0f}; //Define waypoints with clear cyan color
         vx_buffer_add_back(buffer, vxo_chain(vxo_mat_translate3(pose.x, pose.y, 0.0),
-                                         vxo_mat_scale(0.1f),
+                                         vxo_mat_scale(0.015f),
                                          vxo_circle(vxo_mesh_style(wypnt_color))));
-        vx_buffer_add_back(buffer, vxo_chain(vxo_mat_translate3(pose.x, pose.y, 0.0),
-                                             vxo_mat_scale(0.05f),
-                                             vxo_box(vxo_mesh_style(color))));
     }
     
     vx_resc* poseResc = vx_resc_createf(path.path.size() * 3);

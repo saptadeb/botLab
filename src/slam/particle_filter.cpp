@@ -39,6 +39,25 @@ pose_xyt_t ParticleFilter::updateFilter(const pose_xyt_t&      odometry,
     return posteriorPose_;
 }
 
+pose_xyt_t ParticleFilter::updateFilterActionOnly(const pose_xyt_t&      odometry)
+{
+    // Only update the particles if motion was detected. If the robot didn't move, then
+    // obviously don't do anything.
+    bool hasRobotMoved = actionModel_.updateAction(odometry);
+    
+    if(hasRobotMoved)
+    {
+        //auto prior = resamplePosteriorDistribution();
+        auto proposal = computeProposalDistribution(posterior_);
+        posterior_ = proposal;
+    }
+    
+    posteriorPose_ = odometry;
+    
+    return posteriorPose_;
+}
+
+
 
 pose_xyt_t ParticleFilter::poseEstimate(void) const
 {

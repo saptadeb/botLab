@@ -32,6 +32,7 @@ public:
     * \param    lcmComm             LCM instance for establishing subscriptions
     * \param    waitForOptitrack    Don't start performing SLAM until a message establishing the reference frame arrives from the Optitrack
     * \param    mappingOnlyMode     Flag indicating if poses are going to be arriving from elsewhere, so just update the mapping (optional, default = false, don't run mapping-only mode)
+    * \param    actionOnlyMode     Flag indicating if we will run the sensor model when updating the particle filter
     * \param    localizationOnlyMap Name of the map to load for localization-only mode (optional, default = "", don't use localization-only mode)
     * \pre mappingOnly or localizationOnly are mutually exclusive. If mappingOnlyMode == true, then localizationOnlyMap.empty()
     *   and if !localizationOnlyMap.empty(), then mappingOnlyMode == false. They can both be empty/false for full SLAM mode.
@@ -42,6 +43,7 @@ public:
                       lcm::LCM& lcmComm, 
                       bool waitForOptitrack,
                       bool mappingOnlyMode = false,
+                      bool actionOnlyMode = false,
                       const std::string localizationOnlyMap = std::string(""));
     
     /**
@@ -64,6 +66,7 @@ private:
     enum Mode
     {
         mapping_only,
+        action_only,
         localization_only,
         full_slam,
     };

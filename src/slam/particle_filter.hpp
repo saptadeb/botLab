@@ -56,11 +56,15 @@ public:
     */
     pose_xyt_t updateFilter(const pose_xyt_t&      odometry,
                             const lidar_t& laser,
-                            const OccupancyGrid&   map);/*,
-                            const float v, //remove for odo model
-                            const float omega,
+                            const OccupancyGrid&   map);
 
-                            const int64_t utime);*/
+    /**
+    * updateFilterActionOnly increments the state estimated by the particle filter but only applies the action model
+    *
+    * \param    odometry        Calculated odometry at the time of the final ray in the laser scan
+    * \return   odometry robot pose.
+    */
+    pose_xyt_t updateFilterActionOnly(const pose_xyt_t&      odometry);
 
     /**
     * poseEstimate retrieves the current pose estimate computed by the filter.
