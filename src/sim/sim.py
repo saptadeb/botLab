@@ -78,10 +78,8 @@ class Gui:
             self._running = False
 
     def on_loop(self):
-        msg = mbot_motor_command_t()
-        msg.trans_v = 0.01
-        msg.angular_v = 0.1
-        # self._lcm.publish('MBOT_MOTOR_COMMAND', msg.encode())
+        self._mbot._pose = self._mbot.interpolate_pose(time.time())
+        self._mbot.reset_motor_cmds()
 
     def on_execute(self):
         if self.on_init() == False:
@@ -117,7 +115,7 @@ class Gui:
         msg = mbot_motor_command_t.decode(data)
         # Override utime with sim time
         msg.utime = int(time.time() * 1e6)
-        self.mbot.current_motor_commands.append(msg)
+        self._mbot.current_motor_commands.append(msg)
 
     def _timesync_handler(self, channel, data):
         msg = timestamp_t.decode(data)
