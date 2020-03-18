@@ -3,7 +3,7 @@ from map import Map
 from mbot import Mbot
 from timing import Rate
 from lidar import Lidar
-from geometry import SpaceConverter
+from geometry import SpaceConverter, Pose
 import math
 import time
 import threading
@@ -15,6 +15,8 @@ from odometry_t import odometry_t
 from mbot_motor_command_t import mbot_motor_command_t
 from lidar_t import lidar_t
 from timestamp_t import timestamp_t
+from pose_xyt_t import pose_xyt_t
+import numpy
 
 
 class Gui:
@@ -27,17 +29,19 @@ class Gui:
         # Controller
         self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
         # LCM update rate
-        self._lcm_handle_rate = 50
+        self._lcm_handle_rate = 100
         # LCM channel names
         self._odometry_channel = 'ODOMETRY'
         self._lidar_channel = 'LIDAR'
         self._motor_command_channel = 'MBOT_MOTOR_COMMAND'
         self._timesync_channel = 'MBOT_TIMESYNC'
+        self._true_pose_channel = 'TRUE_POSE'
         # Subscribe to lcm topics
         self._lcm.subscribe(self._odometry_channel, self._odometry_handler)
         self._lcm.subscribe(self._lidar_channel, self._lidar_handler)
         self._lcm.subscribe(self._motor_command_channel, self._motor_command_handler)
         self._lcm.subscribe(self._timesync_channel, self._timesync_handler)
+        self._lcm.subscribe(self._true_pose_channel, self._pose_handler)
         # Start callback thread
         self._lcm_thread = threading.Thread(target=self._handle_lcm)
         self._lcm_thread.start()
@@ -45,7 +49,7 @@ class Gui:
         # View
         self._running = True
         self._display_surf = None
-        self._size = self._width, self._height = 640, 400 * 2
+        self._size = self._width, self._height = 640, 640
         self._sprites = pygame.sprite.RenderUpdates()
         self._max_frame_rate = 50
         self._sprites.add(self._mbot)
@@ -58,8 +62,9 @@ class Gui:
         self._display_surf = pygame.display.get_surface()
         # Map
         self._map = Map()
-        self._map.load_from_file('../../data/astar/maze.map')
-        self._space_converter = SpaceConverter(self._map.meters_per_cell * self._map.width / self._width)
+        self._map.load_from_file('../../data/obstacle_slam_10mx10m_5cm.map')
+        self._space_converter = SpaceConverter(self._width / (self._map.meters_per_cell * self._map.width),
+                                               (self._map._global_origin_x, self._map._global_origin_y))
         self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
         # Start
@@ -116,6 +121,10 @@ class Gui:
 
     def _timesync_handler(self, channel, data):
         msg = timestamp_t.decode(data)
+
+    def _pose_handler(self, channel, data):
+        msg = pose_xyt_t.decode(data)
+        # self._mbot._pose = Pose(msg.x, msg.y, msg.theta)
 
     """ View """
 

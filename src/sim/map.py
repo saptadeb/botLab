@@ -1,5 +1,6 @@
 import pygame
 import math
+import numpy
 
 
 class Map:
@@ -44,9 +45,11 @@ class Map:
         # Draw occupied cells
         for index in self._occupied_cells:
             row, col = self.index_to_row_col(index)
-            left = space_converter.to_pixel(col * self._meters_per_cell)
-            top = space_converter.to_pixel(row * self._meters_per_cell)
-            rect = pygame.Rect(left, top, cell_size, cell_size)
+            pixels_cords = space_converter * numpy.matrix([
+                [col * self._meters_per_cell + self._global_origin_x],
+                [row * self._meters_per_cell + self._global_origin_y],
+                [1]])
+            rect = pygame.Rect(pixels_cords[0, 0], pixels_cords[1, 0], cell_size, cell_size)
             pygame.draw.rect(self.image, (0, 0, 0), rect)
 
         return self.image

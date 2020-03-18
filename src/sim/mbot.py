@@ -5,6 +5,7 @@ import lcm
 import sys
 import time
 import threading
+from copy import copy, deepcopy
 from timing import Rate
 
 sys.path.append('../lcmtypes')
@@ -16,7 +17,7 @@ class Mbot(pygame.sprite.Sprite):
         super(Mbot, self).__init__()
 
         # Model
-        self._pose = geometry.Pose(4.5, 4.5, math.pi / 2)
+        self._pose = geometry.Pose(0, 0, 0)
         stop = mbot_motor_command_t()
         stop.utime = int(time.time() * 1e6)
         self.current_motor_commands = [stop]
@@ -37,7 +38,7 @@ class Mbot(pygame.sprite.Sprite):
         self.image = pygame.Surface([radius * 2.5, radius * 2.5])
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
-        self.rect.center = [space_converter.to_pixel(x) for x in self._pose.translation()]
+        self.rect.center = (space_converter * self._pose.translation())[0:2].T.tolist()[0]
         self.image.fill((0, 0, 0))
         update_rect = pygame.draw.circle(self.image, self._primary_color, (radius, radius), radius)
         pygame.draw.arc(
