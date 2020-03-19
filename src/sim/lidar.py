@@ -19,7 +19,7 @@ class Lidar(pygame.sprite.Sprite):
         self._num_ranges = 290
         self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]
         self._max_distance = 5
-        self._scan_rate = 10
+        self._scan_rate = 3
         self._beam_rate = self._num_ranges * self._scan_rate
         self._ranges = []
         self._times = []
