@@ -78,7 +78,7 @@ class Lidar(pygame.sprite.Sprite):
         # Get the origin of the scan
         pose = self._get_current_pose(at_time)
         # Rotate the pose to point in the direction of the beam
-        pose.theta += theta
+        pose.theta -= theta  # Lidar is z-down (I think)
         self._beam_start_poses.append(pose.as_list()[:2])
         # Ray trace along map until edge of map, max distance, or hit an object
         for x, y, dist in self._beam_step_generator(pose):
