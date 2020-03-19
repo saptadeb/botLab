@@ -75,6 +75,15 @@ class Map:
             self._occupied_cells.extend([self.row_col_to_index(row, col) for col, cell in
                 enumerate(line.split()) if int(cell) > 0])
 
+    """ Data access """
+    def at_xy(self, x, y):
+        row = math.floor((y - self._global_origin_y) / self._meters_per_cell)
+        col = math.floor((x - self._global_origin_x) / self._meters_per_cell)
+        index = self.row_col_to_index(row, col)
+        if index in self._occupied_cells:
+            return True
+        return False
+
     """ Map Math """
 
     def row_col_to_index(self, row, col):

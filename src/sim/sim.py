@@ -24,7 +24,7 @@ class Gui:
         # Model
         self._map = None
         self._mbot = Mbot()
-        self._lidar = Lidar()
+        self._lidar = None
 
         # Controller
         self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
@@ -49,10 +49,9 @@ class Gui:
         # View
         self._running = True
         self._display_surf = None
-        self._size = self._width, self._height = 640, 640
+        self._size = self._width, self._height = 1000, 1000
         self._sprites = pygame.sprite.RenderUpdates()
         self._max_frame_rate = 50
-        self._sprites.add(self._mbot)
         self._space_converter = None
 
     def on_init(self):
@@ -67,9 +66,14 @@ class Gui:
                                                (self._map._global_origin_x, self._map._global_origin_y))
         self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
+        # Lidar
+        self._lidar = Lidar(lambda at_time: self._mbot.interpolate_pose(at_time), self._map, self._space_converter)
+        self._lidar.start()
+        # Add sprites
+        self._sprites.add(self._lidar)
+        self._sprites.add(self._mbot)
         # Start
         self._running = True
-        self._lidar.start()
 
     """ Controller """
 
@@ -133,6 +137,7 @@ class Gui:
         pygame.display.flip()
 
     def on_cleanup(self):
+        self._lidar.stop()
         pygame.quit()
 
 
