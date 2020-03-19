@@ -56,13 +56,8 @@ class Mbot(pygame.sprite.Sprite):
         self._render(space_converter)
 
     def interpolate_pose(self, at_time):
-        print('-----------------------')
-        print_cmd = lambda name, cmd: print('{}: ({}, {}, {})'.format(name, cmd.trans_v, cmd.angular_v, cmd.utime))
         last_cmd = self.current_motor_commands[0]
         start_time = (last_cmd.utime / 1e6)
-        for i, cmd in enumerate(self.current_motor_commands):
-            print_cmd(i, cmd)
-
         if start_time > at_time:
             raise Exception("Cannot interpolate pose backwards in time")
 
@@ -80,17 +75,12 @@ class Mbot(pygame.sprite.Sprite):
                 next_cmd = self.current_motor_commands[cmd_index]
                 # Check if at_time is before the next command
                 if next_cmd.utime / 1e6 < at_time: # or last motor command:
-                    print('Using next cmd utime')
                     end_time = next_cmd.utime / 1e6
                 else:
                     # Reached at_time before all motor commands
-                    print('Got to at time before all motor commands handled')
                     done = True
             # Calculate time diff
             dt = end_time - start_time
-            print('start_time', start_time)
-            print('end_time', end_time)
-            print('dt', dt)
             # Calculate the updates to x y and theta
             # dx     = int_ti^tf trans_v * cos(angular_v * t + theta_i - angular_v * ti) dt
             #        = angular_v != 0 --> (trans_v / angular_v) * (sin(angular_v * t + theta_i - angular_v * ti)) |_ti^tf
@@ -110,9 +100,7 @@ class Mbot(pygame.sprite.Sprite):
                 init_angle = pose.theta - last_cmd.angular_v * start_time
                 dx = trans_over_ang * (math.sin(last_cmd.angular_v * end_time + init_angle) - math.sin(pose.theta))
                 dy = -trans_over_ang * (math.cos(last_cmd.angular_v * end_time + init_angle) - math.cos(pose.theta))
-            print('d_pose:', geometry.Pose(dx, dy, dtheta))
             pose += geometry.Pose(dx, dy, dtheta)
-            print('pose:', pose)
             # Check if done
             if done:
                 break
