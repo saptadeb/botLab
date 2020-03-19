@@ -45,6 +45,7 @@ class Rate:
 
     def __enter__(self):
         self._start_time = time.time()
+        return self
 
     def __exit__(self, type, value, traceback):
         elapsed = time.time() - self._start_time

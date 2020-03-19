@@ -5,6 +5,7 @@ import lcm
 import sys
 import time
 import threading
+import numpy
 from copy import copy, deepcopy
 from timing import Rate
 
@@ -93,13 +94,13 @@ class Mbot(pygame.sprite.Sprite):
             dy = 0
             dtheta = last_cmd.angular_v * dt
             if last_cmd.angular_v <= 1e-5:  # Small values of angular_v would be numerically unstable so treat as 0
-                dx = last_cmd.trans_v * math.cos(pose.theta) * dt
-                dy = last_cmd.trans_v * math.sin(pose.theta) * dt
+                dx = last_cmd.trans_v * numpy.cos(pose.theta) * dt
+                dy = last_cmd.trans_v * numpy.sin(pose.theta) * dt
             else:
                 trans_over_ang = last_cmd.trans_v / last_cmd.angular_v
                 init_angle = pose.theta - last_cmd.angular_v * start_time
-                dx = trans_over_ang * (math.sin(last_cmd.angular_v * end_time + init_angle) - math.sin(pose.theta))
-                dy = -trans_over_ang * (math.cos(last_cmd.angular_v * end_time + init_angle) - math.cos(pose.theta))
+                dx = trans_over_ang * (numpy.sin(last_cmd.angular_v * end_time + init_angle) - numpy.sin(pose.theta))
+                dy = -trans_over_ang * (numpy.cos(last_cmd.angular_v * end_time + init_angle) - numpy.cos(pose.theta))
             pose += geometry.Pose(dx, dy, dtheta)
             # Check if done
             if done:

@@ -86,15 +86,21 @@ class Lidar(pygame.sprite.Sprite):
                 self._beam_end_poses.append((x, y))
                 # TODO(Kevin): Calculate exact distance
                 return dist
-        self._beam_end_poses.append((pose.x + self._max_distance * math.cos(pose.theta),
-                                     pose.y + self._max_distance * math.sin(pose.theta)))
+        self._beam_end_poses.append((pose.x + self._max_distance * numpy.cos(pose.theta),
+                                     pose.y + self._max_distance * numpy.sin(pose.theta)))
         return self._max_distance
 
     def _beam_step_generator(self, pose):
         step_size = self._map._meters_per_cell / 2
+        dx = numpy.cos(pose.theta) * step_size
+        dy = numpy.sin(pose.theta) * step_size
+        x = pose.x
+        y = pose.y
         dist = 0
         while dist <= self._max_distance:
-            yield (pose.x + dist * math.cos(pose.theta), pose.y + dist * math.sin(pose.theta), dist)
+            yield (x, y, dist)
+            x += dx
+            y += dy
             dist += step_size
 
     def _publish(self):
