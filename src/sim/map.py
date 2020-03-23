@@ -87,17 +87,9 @@ class Map:
     """ Map Math """
 
     def row_col_to_index(self, row, col):
-        return Map.row_col_width_to_index(row, col, self._width)
+        return row * self._width + col
 
     def index_to_row_col(self, index):
-        return Map.index_width_to_row_col(index, self._width)
-
-    @staticmethod
-    def row_col_width_to_index(row, col, width):
-        return row * width + col
-
-    @staticmethod
-    def index_width_to_row_col(index, width):
-        row = math.floor(index / width)
-        col = index - row * width
+        row = math.floor(index / self._width)
+        col = index - row * self._width
         return (row, col)
