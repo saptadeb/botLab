@@ -5,7 +5,7 @@ import numpy
 
 class Map:
     def __init__(self):
-        self._occupied_cells = []
+        self._occupied_cells = set()
         self._global_origin_x = 0
         self._global_origin_y = 0
         self._width = 10
@@ -28,7 +28,7 @@ class Map:
 
     @property
     def occupied_cells(self):
-        return list(self._occupied_cells)
+        return set(self._occupied_cells)
 
     """ GUI """
 
@@ -72,8 +72,8 @@ class Map:
 
         # Load in the map
         for row, line in enumerate(lines[1:]):
-            self._occupied_cells.extend([self.row_col_to_index(row, col) for col, cell in
-                enumerate(line.split()) if int(cell) > 0])
+            self._occupied_cells |= {self.row_col_to_index(row, col) for col, cell in
+                enumerate(line.split()) if int(cell) > 0}
 
     """ Data access """
     def at_xy(self, x, y):
