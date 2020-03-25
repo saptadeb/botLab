@@ -9,6 +9,7 @@ def clamp(rads):
         rads += 2 * math.pi
     return rads
 
+
 class Pose:
     def __init__(self, x, y, theta):
         self.x = x
@@ -26,11 +27,18 @@ class Pose:
     def as_list(self):
         return [self.x, self.y, self.theta]
 
-    def as_numpy(self):
+    def as_numpy_tf(self):
         return numpy.matrix([
             [numpy.cos(self.theta), -numpy.sin(self.theta), self.x],
             [numpy.sin(self.theta), numpy.cos(self.theta), self.y],
             [0, 0, 1]])
+
+    def as_numpy(self):
+        return numpy.matrix([[self.x], [self.y], [self.theta]])
+
+    @classmethod
+    def from_numpy(cls, mat):
+        return cls(mat[0, 0], mat[1, 0], mat[2, 0])
 
     def translation(self):
         return numpy.matrix([[self.x], [self.y], [1]])
@@ -49,6 +57,16 @@ class Pose:
 
     def __str__(self):
         return '({} m, {} m, {} rad)'.format(self.x, self.y, self.theta)
+
+
+class Twist:
+    def __init__(self, vx, vy, vtheta):
+        self.vx = vx
+        self.vy = vy
+        self.vtheta = vtheta
+
+    def as_numpy(self):
+        return numpy.matrix([[self.vx], [self.vy], [self.vtheta]])
 
 
 class SpaceConverter:
