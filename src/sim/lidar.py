@@ -5,6 +5,7 @@ from timing import Rate
 import math
 import pygame
 import numpy
+from copy import deepcopy
 # Lcm
 import lcm
 sys.path.append('../lcmtypes')
@@ -84,7 +85,7 @@ class Lidar(pygame.sprite.Sprite):
 
     def _beam_scan(self, at_time, theta):
         # Get the origin of the scan
-        pose = self._get_current_pose(at_time)
+        pose = deepcopy(self._get_current_pose(at_time))
         # Rotate the pose to point in the direction of the beam
         pose.theta -= theta  # Lidar is z-down (I think)
         self._beam_start_poses.append(pose.as_list()[:2])
