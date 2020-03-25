@@ -67,19 +67,19 @@ class Lidar(pygame.sprite.Sprite):
 
     def scan(self):
         while self._running:
-            with Rate(self._beam_rate):
-                now = time.time()
-                theta = self._thetas[len(self._ranges)]
-                self._ranges.append(self._beam_scan(now, theta))
-                self._times.append(int(1e6 * now))
-                if len(self._ranges) == self._num_ranges:
-                    self._publish()
-                    self._ranges = []
-                    self._times = []
-                    # TODO(Kevin): Call in another thread
-                    self._render(self._space_converter)
-                    self._beam_start_poses = []
-                    self._beam_end_poses = []
+            with Rate(self._scan_rate):
+                for _ in range(self._num_ranges):
+                    now = time.time()
+                    theta = self._thetas[len(self._ranges)]
+                    self._ranges.append(self._beam_scan(now, theta))
+                    self._times.append(int(1e6 * now))
+                self._publish()
+                self._ranges = []
+                self._times = []
+                # TODO(Kevin): Call in another thread
+                self._render(self._space_converter)
+                self._beam_start_poses = []
+                self._beam_end_poses = []
 
     def _beam_scan(self, at_time, theta):
         # Get the origin of the scan
