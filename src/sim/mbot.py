@@ -1,28 +1,39 @@
 import pygame
 import geometry
 import math
-import lcm
 import sys
 import time
-import threading
 import numpy
 from copy import copy, deepcopy
-from timing import Rate
 
 sys.path.append('../lcmtypes')
 from mbot_motor_command_t import mbot_motor_command_t
 
 
 class Mbot(pygame.sprite.Sprite):
+    class State:
+        def __init__(self, pose, twist, stamp):
+            self.stamp = stamp
+            self.pose = pose
+            self.twist = twist
+
     def __init__(self):
         super(Mbot, self).__init__()
 
         # Model
         self._pose = geometry.Pose(0, 0, 0)
         stop = mbot_motor_command_t()
-        stop.utime = int(time.time() * 1e6)
-        self.current_motor_commands = [stop]
+        stop.utime = int(0)
+        self._current_motor_commands = [stop]
         self._radius = 0.1
+        # Initialize trajectory to all 0 poses from now - trajectory_length to now for every trajectory step in time
+        self._trajectory_length = 10.0  # Seconds
+        self._trajectory_step = 0.005  # Seconds
+        num_steps = int(self._trajectory_length / self._trajectory_step)
+        start_time = time.perf_counter() - (num_steps * self._trajectory_step)
+        self._trajectory = [
+            Mbot.State(geometry.Pose(0, 0, 0), geometry.Twist(0, 0, 0), start_time + (i * self._trajectory_step)) for i
+            in range(num_steps)]
 
         # View
         self._primary_color = pygame.Color(0, 0, 255)
@@ -54,61 +65,125 @@ class Mbot(pygame.sprite.Sprite):
     """ Controller """
 
     def update(self, space_converter):
+        # Update current pose
+        self._pose = self.get_current_pose()
+        # Remove old data
+        old_time = time.perf_counter() - self._trajectory_length
+        self._trajectory = list(filter(lambda pose: pose.stamp > old_time, self._trajectory))
+        last_motor_cmd = self._current_motor_commands[-1]
+        self._current_motor_commands = list(
+            filter(lambda cmd: cmd.utime > old_time * 1e6, self._current_motor_commands))
+        # Add the last motor command with current time back if it was deleted
+        if len(self._current_motor_commands) == 0:
+            last_motor_cmd.utime = int(time.perf_counter() * 1e6)
+            self._current_motor_commands.append(last_motor_cmd)
+        # Render
         self._render(space_converter)
 
-    def interpolate_pose(self, at_time):
-        last_cmd = self.current_motor_commands[0]
-        start_time = (last_cmd.utime / 1e6)
-        if start_time > at_time:
-            raise Exception("Cannot interpolate pose backwards in time")
+    def add_motor_cmd(self, cmd):
+        # Remove any poses calculated after this motor command in time
+        self._trajectory = list(filter(lambda pose: pose.stamp <= cmd.utime, self._trajectory))
+        self._current_motor_commands.append(cmd)
+
+    def get_current_pose(self):
+        return self.get_pose(time.perf_counter())
+
+    def get_pose(self, at_time):
+        # Check if the requested time is before the oldest pose
+        earliest_time = self._trajectory[0].stamp
+        if earliest_time > at_time:
+            raise Exception("Pose at time {} is before the oldest pose in mbot trajectory ({}s long)".format(
+                at_time, self._trajectory_length))
+        # Check if the pose has already been calculated
+        newest_time = self._trajectory[-1].stamp
+        if newest_time > at_time:
+            return self._interpolate_pose(at_time)
+        # Use the motion model to predict the future
+        return self._model_motion(at_time)
+
+    def _interpolate_pose(self, at_time):
+        # Get the calculated pose
+        prior_state = self._trajectory[0]
+        index = 0
+        for index, state in enumerate(self._trajectory):
+            if state.stamp > at_time:
+                break
+            prior_state = state
+        next_state = self._trajectory[index]
+        # Assume constant acceleration model
+        accel = (next_state.twist.as_numpy() - prior_state.twist.as_numpy()) / (next_state.stamp - prior_state.stamp)
+        dt = at_time - prior_state.stamp
+        dpose = 0.5 * accel * dt * dt + prior_state.twist.as_numpy() * dt
+        return geometry.Pose.from_numpy(prior_state.pose.as_numpy() + dpose)
+
+    def _model_motion(self, at_time):
+        state = self._trajectory[-1]
+        if state.stamp > at_time:
+            print('Should never see motion model calling get_pose')
+            return self.get_pose(at_time)
 
         # Interpolate with infinite acceleration model
-        done = False
-        pose = copy(self._pose)
-        end_time = start_time
-        for cmd_index in range(1, len(self.current_motor_commands) + 1):
-            # Set start time to previous end time
-            start_time = end_time
-            # Get the end time from the at_time or the next command
-            next_cmd = None
-            end_time = at_time
-            if cmd_index < len(self.current_motor_commands):
-                next_cmd = self.current_motor_commands[cmd_index]
-                # Check if at_time is before the next command
-                if next_cmd.utime / 1e6 < at_time: # or last motor command:
-                    end_time = next_cmd.utime / 1e6
-                else:
-                    # Reached at_time before all motor commands
-                    done = True
-            # Calculate time diff
+        num_steps = math.floor((at_time - state.stamp) / self._trajectory_step)
+        times = [state.stamp + i * self._trajectory_step for i in range(num_steps)]
+        start_time = state.stamp
+        last_state = deepcopy(state)
+        for start_time in times:
+            end_time = start_time + self._trajectory_step
+            # Determine if there are any motor commands in this step
+            ustart = start_time * 1e6
+            uend = end_time * 1e6
+            motor_cmds = list(filter(lambda cmd: cmd.utime > ustart and cmd.utime < uend, self._current_motor_commands))
+            # Handle each section of this time interval with the correct motor command
+            for cmd in motor_cmds:
+                # Calculate time diff
+                cmd_time = cmd.utime / 1e6
+                dt = cmd_time - start_time
+                dpose = self._const_vel_motion(last_state, dt)
+                # Update last state and add to trajectory
+                start_time = cmd_time
+                last_state = Mbot.State(last_state.pose + dpose,
+                                        geometry.Twist(cmd.trans_v * numpy.cos(last_state.pose.theta),
+                                                       cmd.trans_v * numpy.sin(last_state.pose.theta),
+                                                       cmd.angular_v),
+                                        cmd_time)
+                self._trajectory.append(last_state)
+            # Calculate to the end of this step
             dt = end_time - start_time
-            # Calculate the updates to x y and theta
-            # dx     = int_ti^tf trans_v * cos(angular_v * t + theta_i - angular_v * ti) dt
-            #        = angular_v != 0 --> (trans_v / angular_v) * (sin(angular_v * t + theta_i - angular_v * ti)) |_ti^tf
-            #        = angular_v == 0 --> trans_v * cos(theta_i) * (tf - ti)
-            # dy     = int_ti^tf tans_v * sin(angular_v * t + theta_i - angular_v * ti) dt
-            #        = angular_v != 0 --> (-trans_v / angular_v) * (cos(angular_v * t + theta_i - angular_v * ti)) |_ti^tf
-            #        = angular_v == 0 --> trans_v * sin(theta_i) * (tf - ti)
-            # dtheta = angular_v * (t - ti)
-            dx = 0
-            dy = 0
-            dtheta = last_cmd.angular_v * dt
-            if last_cmd.angular_v <= 1e-5:  # Small values of angular_v would be numerically unstable so treat as 0
-                dx = last_cmd.trans_v * numpy.cos(pose.theta) * dt
-                dy = last_cmd.trans_v * numpy.sin(pose.theta) * dt
-            else:
-                trans_over_ang = last_cmd.trans_v / last_cmd.angular_v
-                init_angle = pose.theta - last_cmd.angular_v * start_time
-                dx = trans_over_ang * (numpy.sin(last_cmd.angular_v * end_time + init_angle) - numpy.sin(pose.theta))
-                dy = -trans_over_ang * (numpy.cos(last_cmd.angular_v * end_time + init_angle) - numpy.cos(pose.theta))
-            pose += geometry.Pose(dx, dy, dtheta)
-            # Check if done
-            if done:
-                break
-        # Reached the end
-        return pose
+            dpose = self._const_vel_motion(last_state, dt)
+            last_state = Mbot.State(last_state.pose + dpose, last_state.twist, end_time)
+            self._trajectory.append(last_state)
+        return last_state.pose
 
-    def reset_motor_cmds(self):
-        cmd = self.current_motor_commands[-1]
-        cmd.utime = int(time.time() * 1e6)
-        self.current_motor_commands = [cmd]
+    def _const_vel_motion(self, state, dt, angular_velocity_tolerance=1e-5):
+        """!
+        @brief      Model constant velocity motion
+
+        Equations of motion:
+        dx     = int_ti^tf trans_v * cos(vtheta * (t - ti) + theta_i) dt
+               = vtheta != 0 --> (trans_v / vtheta) * (sin(vtheta * (t - ti) + theta_i)) - sin(theta_i)
+               = vtheta == 0 --> trans_v * cos(theta_i) * (tf - ti)
+        dy     = int_ti^tf tans_v * sin(vtheta * (t - ti) + theta_i) dt
+               = vtheta != 0 --> (-trans_v / vtheta) * (cos(vtheta * (t - ti) + theta_i)) - cos(theta_i)
+               = vtheta == 0 --> trans_v * sin(theta_i) * (tf - ti)
+        dtheta = vtheta * (t - ti)
+
+        @param      state                           The state at the start of the motion
+        @param      dt                              Delta time
+        @param      angular_velocity_tolerance      Any angular velocity magnitude less than this is considered zero for
+                                                    numerical stability
+
+        """
+        # Calculate the updates to x y and theta
+        dx = 0
+        dy = 0
+        dtheta = state.twist.vtheta * dt
+        if state.twist.vtheta <= angular_velocity_tolerance:  # Small values are numerically unstable so treat as 0
+            dx = state.twist.vx * dt
+            dy = state.twist.vy * dt
+            dtheta = 0
+        else:
+            trans_over_ang = numpy.sqrt(state.twist.vx ** 2 + state.twist.vy ** 2) / state.twist.vtheta
+            dx = trans_over_ang * (numpy.sin(state.twist.vtheta * dt + state.pose.theta) - numpy.sin(state.pose.theta))
+            dy = -trans_over_ang * (numpy.cos(state.twist.vtheta * dt + state.pose.theta) - numpy.cos(state.pose.theta))
+
+        return geometry.Pose(dx, dy, dtheta)

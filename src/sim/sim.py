@@ -3,8 +3,7 @@ from map import Map
 from mbot import Mbot
 from timing import Rate
 from lidar import Lidar
-from geometry import SpaceConverter, Pose
-import math
+from geometry import SpaceConverter
 import time
 import threading
 from pygame.locals import *
@@ -16,7 +15,6 @@ from mbot_motor_command_t import mbot_motor_command_t
 from lidar_t import lidar_t
 from timestamp_t import timestamp_t
 from pose_xyt_t import pose_xyt_t
-import numpy
 
 
 class Gui:
@@ -67,7 +65,7 @@ class Gui:
         self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
         # Lidar
-        self._lidar = Lidar(lambda at_time: self._mbot.interpolate_pose(at_time), self._map, self._space_converter)
+        self._lidar = Lidar(lambda at_time: self._mbot.get_pose(at_time), self._map, self._space_converter)
         self._lidar.start()
         # Add sprites
         self._sprites.add(self._lidar)
@@ -82,14 +80,13 @@ class Gui:
             self._running = False
 
     def on_loop(self):
-        self._mbot._pose = self._mbot.interpolate_pose(time.time())
-        self._mbot.reset_motor_cmds()
+        pass
 
     def on_execute(self):
-        if self.on_init() == False:
+        if self.on_init() is False:
             self._running = False
 
-        while( self._running ):
+        while self._running:
             with Rate(self._max_frame_rate):
                 for event in pygame.event.get():
                     self.on_event(event)
@@ -118,8 +115,8 @@ class Gui:
     def _motor_command_handler(self, channel, data):
         msg = mbot_motor_command_t.decode(data)
         # Override utime with sim time
-        msg.utime = int(time.time() * 1e6)
-        self._mbot.current_motor_commands.append(msg)
+        msg.utime = int(time.perf_counter() * 1e6)
+        self._mbot.add_motor_cmd(msg)
 
     def _timesync_handler(self, channel, data):
         msg = timestamp_t.decode(data)
@@ -141,6 +138,6 @@ class Gui:
         pygame.quit()
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     sim = Gui()
     sim.on_execute()
