@@ -25,6 +25,7 @@ class Rate:
         if period is not None:
             self.period = period
         self._quiet = quiet
+        self._start_time = time.perf_counter()
 
     @property
     def rate(self):
@@ -45,16 +46,21 @@ class Rate:
         self._rate = 1 / self._period
 
     def __enter__(self):
-        self._start_time = time.time()
+        self._start_time = time.perf_counter()
         return self
 
     def __exit__(self, type, value, traceback):
-        elapsed = time.time() - self._start_time
+        elapsed = time.perf_counter() - self._start_time
         if elapsed >= self._period:
             if not self._quiet:
                 raise Exception('Rate of {} fell behind by {}s'.format(self._rate, elapsed - self._period))
             # Enough time has already elapsed
             return
         # Sleep the remaining time
-        time.sleep(self._period - elapsed)
+        sleep_start = time.perf_counter()
+        time_left = self._period - elapsed
+        while time_left > 5e-3:
+            time.sleep(time_left / 2)
+            time_left = self._period - (time.perf_counter() - self._start_time)
+        sleep_time = time.perf_counter() - sleep_start
 
