@@ -12,9 +12,6 @@ import lcm
 sys.path.append('../lcmtypes')
 from odometry_t import odometry_t
 from mbot_motor_command_t import mbot_motor_command_t
-from lidar_t import lidar_t
-from timestamp_t import timestamp_t
-from pose_xyt_t import pose_xyt_t
 
 
 class Gui:
@@ -30,16 +27,9 @@ class Gui:
         self._lcm_handle_rate = 100
         # LCM channel names
         self._odometry_channel = 'ODOMETRY'
-        self._lidar_channel = 'LIDAR'
         self._motor_command_channel = 'MBOT_MOTOR_COMMAND'
-        self._timesync_channel = 'MBOT_TIMESYNC'
-        self._true_pose_channel = 'TRUE_POSE'
         # Subscribe to lcm topics
-        self._lcm.subscribe(self._odometry_channel, self._odometry_handler)
-        self._lcm.subscribe(self._lidar_channel, self._lidar_handler)
         self._lcm.subscribe(self._motor_command_channel, self._motor_command_handler)
-        self._lcm.subscribe(self._timesync_channel, self._timesync_handler)
-        self._lcm.subscribe(self._true_pose_channel, self._pose_handler)
         # Start callback thread
         self._lcm_thread = threading.Thread(target=self._handle_lcm)
         self._lcm_thread.start()
@@ -80,7 +70,13 @@ class Gui:
             self._running = False
 
     def on_loop(self):
-        pass
+        # Publish odometry
+        pose = self._mbot.get_current_pose()
+        msg = odometry_t()
+        msg.x = pose.x
+        msg.y = pose.y
+        msg.theta = pose.theta
+        self._lcm.publish(self._odometry_channel, msg.encode())
 
     def on_execute(self):
         if self.on_init() is False:
@@ -106,24 +102,11 @@ class Gui:
             print("lcm exit!")
             sys.exit()
 
-    def _odometry_handler(self, channel, data):
-        msg = odometry_t.decode(data)
-
-    def _lidar_handler(self, channel, data):
-        msg = lidar_t.decode(data)
-
     def _motor_command_handler(self, channel, data):
         msg = mbot_motor_command_t.decode(data)
         # Override utime with sim time
         msg.utime = int(time.perf_counter() * 1e6)
         self._mbot.add_motor_cmd(msg)
-
-    def _timesync_handler(self, channel, data):
-        msg = timestamp_t.decode(data)
-
-    def _pose_handler(self, channel, data):
-        msg = pose_xyt_t.decode(data)
-        # self._mbot._pose = Pose(msg.x, msg.y, msg.theta)
 
     """ View """
 
