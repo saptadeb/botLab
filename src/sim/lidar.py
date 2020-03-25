@@ -10,16 +10,23 @@ import lcm
 sys.path.append('../lcmtypes')
 from lidar_t import lidar_t
 
+
 class Lidar(pygame.sprite.Sprite):
     def __init__(self, get_current_pose, world_map, space_converter):
         super(Lidar, self).__init__()
         # Model
         self._get_current_pose = get_current_pose
         self._map = world_map
-        self._num_ranges = 290
-        self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]
-        self._max_distance = 5
-        self._scan_rate = 3
+        # Aproximate true lidar parameters
+        # self._num_ranges = 300
+        # self._thetas = Read from encoder # Make random-ish
+        # self._max_distance = 8
+        # self._scan_rate = 10
+        # Lidar parameters to make it work until we can improve code
+        self._num_ranges = 180
+        self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]  # Make random-ish
+        self._max_distance = 8
+        self._scan_rate = 2
         self._beam_rate = self._num_ranges * self._scan_rate
         self._ranges = []
         self._times = []
