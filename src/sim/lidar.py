@@ -27,7 +27,7 @@ class Lidar(pygame.sprite.Sprite):
         self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]  # Make random-ish
         self._max_distance = 8
         self._scan_rate = 2
-        self._beam_rate = self._num_ranges * self._scan_rate
+        self._beam_period = 1 / (self._num_ranges * self._scan_rate)
         self._ranges = []
         self._times = []
 
@@ -68,11 +68,12 @@ class Lidar(pygame.sprite.Sprite):
     def scan(self):
         while self._running:
             with Rate(self._scan_rate):
-                for _ in range(self._num_ranges):
-                    now = time.time()
-                    theta = self._thetas[len(self._ranges)]
+                now = time.perf_counter()
+                for beam_index in range(self._num_ranges - 1, -1, -1):
+                    theta = self._thetas[beam_index]
                     self._ranges.append(self._beam_scan(now, theta))
                     self._times.append(int(1e6 * now))
+                    now -= self._beam_period
                 self._publish()
                 self._ranges = []
                 self._times = []
