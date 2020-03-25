@@ -6,12 +6,13 @@ class Rate:
     @brief      Runs code inside a with block sleeping to maintain the rate
     """
 
-    def __init__(self, rate=None, period=None):
+    def __init__(self, rate=None, period=None, quiet=True):
         """!
         @brief      Constructs a new instance.
 
         @param      rate    The rate in Hz
         @param      period  The period is seconds
+        @param      quiet   If false then an exception is raised when the Rate cannot be maintained
 
         Exactly one of rate or period may be used if both or none are specified an error will be raised
         """
@@ -23,7 +24,7 @@ class Rate:
             self.rate = rate
         if period is not None:
             self.period = period
-        self._start_time = time.time()
+        self._quiet = quiet
 
     @property
     def rate(self):
@@ -50,6 +51,8 @@ class Rate:
     def __exit__(self, type, value, traceback):
         elapsed = time.time() - self._start_time
         if elapsed >= self._period:
+            if not self._quiet:
+                raise Exception('Rate of {} fell behind by {}s'.format(self._rate, elapsed - self._period))
             # Enough time has already elapsed
             return
         # Sleep the remaining time
