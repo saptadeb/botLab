@@ -19,22 +19,18 @@ class Lidar(pygame.sprite.Sprite):
         self._get_current_pose = get_current_pose
         self._map = world_map
         # Aproximate true lidar parameters
-        # self._num_ranges = 300
-        # self._thetas = Read from encoder # Make random-ish
-        # self._max_distance = 8
-        # self._scan_rate = 10
-        # Lidar parameters to make it work until we can improve code
-        self._num_ranges = 180
-        self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]  # Make random-ish
-        self._theta_step_size = 2 * math.pi / self._num_ranges
+        self._num_ranges = 290
         self._max_distance = 8
-        self._scan_rate = 2
+        self._scan_rate = 10
         self._beam_period = 1 / (self._num_ranges * self._scan_rate)
+        self._thetas = []
         self._ranges = []
         self._times = []
+        # Noise
         self._add_noise = True
         self._dist_measure_sigma = 0.05
-        self._theta_step_sigma = 0.1 * self._theta_step_size
+        self._theta_step_sigma = 0.1 * (2 * numpy.pi / self._num_ranges)
+        self._num_ranges_noise = 3
 
         # Control
         self._lidar_channel = 'LIDAR'
@@ -74,13 +70,21 @@ class Lidar(pygame.sprite.Sprite):
         while self._running:
             with Rate(self._scan_rate):
                 now = time.perf_counter()
-                theta = numpy.random.random() * 2 * numpy.pi
-                for _ in range(self._num_ranges):
+                num_ranges = self._num_ranges
+                theta = 0
+                theta_step_size = 2 * math.pi / num_ranges
+                beam_period = 1 / (num_ranges * self._scan_rate)
+                if self._add_noise:
+                    theta = numpy.random.random() * 2 * numpy.pi
+                    num_ranges += numpy.random.randint(-self._num_ranges_noise, self._num_ranges_noise)
+                    theta_step_size = 2 * math.pi / num_ranges
+                    beam_period = 1 / (num_ranges * self._scan_rate)
+                for _ in range(num_ranges):
                     self._thetas.append(theta)
                     self._ranges.append(self._beam_scan(now, theta))
                     self._times.append(int(1e6 * now))
-                    now -= self._beam_period
-                    theta += self._theta_step_size
+                    now -= beam_period
+                    theta += theta_step_size
                     if self._add_noise:
                         theta += numpy.random.normal(0, self._theta_step_sigma)
                 self._publish()
@@ -128,11 +132,12 @@ class Lidar(pygame.sprite.Sprite):
 
     def _publish(self):
         msg = lidar_t()
-        msg.num_ranges = self._num_ranges
+        num_ranges = len(self._ranges)
+        msg.num_ranges = num_ranges
         msg.ranges = self._ranges
         msg.thetas = self._thetas
         msg.times = self._times
-        msg.intensities = [0] * self._num_ranges
+        msg.intensities = [0] * num_ranges
         self._lcm.publish(self._lidar_channel, msg.encode())
 
     """ View """
