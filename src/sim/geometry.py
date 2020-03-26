@@ -89,4 +89,3 @@ class SpaceConverter:
 
     def __mul__(self, other):
         return self._world_to_pixel * other
-

@@ -34,7 +34,7 @@ class Map:
 
     def render(self, space_converter):
         # Calculate cell size
-        cell_size = space_converter.to_pixel(self._meters_per_cell)
+        cell_size = space_converter.to_pixel(self._meters_per_cell) + 1
 
         # Draw the map on a new surface
         width = space_converter.to_pixel(self._meters_per_cell * self._width)

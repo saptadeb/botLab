@@ -51,7 +51,7 @@ class Mbot(pygame.sprite.Sprite):
     """ View """
 
     def _render(self, space_converter):
-        radius = space_converter.to_pixel(self._radius)
+        radius = space_converter.to_pixel(self._radius) + 1
         self.image = pygame.Surface([radius * 2.5, radius * 2.5])
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
