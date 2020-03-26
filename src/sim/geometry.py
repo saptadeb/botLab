@@ -55,6 +55,9 @@ class Pose:
         self.theta += other.theta
         return self
 
+    def __sub__(self, other):
+        return Pose(self.x - other.x, self.y - other.y, self.theta - other.theta)
+
     def __str__(self):
         return '({} m, {} m, {} rad)'.format(self.x, self.y, self.theta)
 
