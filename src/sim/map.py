@@ -47,7 +47,8 @@ class Map:
             row, col = self.index_to_row_col(index)
             pixels_cords = space_converter * numpy.matrix([
                 [col * self._meters_per_cell + self._global_origin_x],
-                [row * self._meters_per_cell + self._global_origin_y],
+                # Add one to row since the y is fliped and we need the top not the bottom
+                [(row + 1) * self._meters_per_cell + self._global_origin_y],
                 [1]])
             rect = pygame.Rect(pixels_cords[0, 0], pixels_cords[1, 0], cell_size, cell_size)
             pygame.draw.rect(self.image, (0, 0, 0), rect)
