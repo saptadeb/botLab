@@ -192,7 +192,16 @@ class Mbot(pygame.sprite.Sprite):
         return geometry.Pose(dx, dy, dtheta)
 
     def _handle_collision(self, pose, twist):
-        while self._map.at_xy(pose.x, pose.y):
+        while any(map(lambda pose: self._map.at_xy(pose.x, pose.y), self._edge_pose_generator(pose, 30))):
             pose.x -= twist.vx * self._trajectory_step / 3.0
             pose.y -= twist.vy * self._trajectory_step / 3.0
         return pose
+
+    def _edge_pose_generator(self, pose, num_steps):
+        step_size = 2 * numpy.pi / num_steps
+        theta = -numpy.pi
+        while theta < numpy.pi:
+            yield geometry.Pose(pose.x + numpy.cos(theta) * self._radius,
+                                pose.y + numpy.sin(theta) * self._radius,
+                                pose.theta)
+            theta += step_size
