@@ -13,7 +13,8 @@ from lidar_t import lidar_t
 
 
 class Lidar(pygame.sprite.Sprite):
-    def __init__(self, get_current_pose, world_map, space_converter):
+    def __init__(self, get_current_pose, world_map, space_converter, use_noise, dist_measure_sigma, theta_step_sigma,
+                 num_ranges_noise):
         super(Lidar, self).__init__()
         # Model
         self._get_current_pose = get_current_pose
@@ -27,10 +28,10 @@ class Lidar(pygame.sprite.Sprite):
         self._ranges = []
         self._times = []
         # Noise
-        self._add_noise = True
-        self._dist_measure_sigma = 0.05
-        self._theta_step_sigma = 0.1 * (2 * numpy.pi / self._num_ranges)
-        self._num_ranges_noise = 3
+        self._add_noise = use_noise
+        self._dist_measure_sigma = dist_measure_sigma
+        self._theta_step_sigma = theta_step_sigma
+        self._num_ranges_noise = num_ranges_noise
 
         # Control
         self._lidar_channel = 'LIDAR'
