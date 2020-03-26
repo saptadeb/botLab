@@ -4,6 +4,7 @@ import math
 import sys
 import time
 import numpy
+import threading
 from copy import copy, deepcopy
 
 sys.path.append('../lcmtypes')
@@ -44,6 +45,9 @@ class Mbot(pygame.sprite.Sprite):
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
 
+        # Control
+        self._trajectory_lock = threading.Lock()
+
     """ View """
 
     def _render(self, space_converter):
@@ -68,39 +72,42 @@ class Mbot(pygame.sprite.Sprite):
     def update(self, space_converter):
         # Update current pose
         self._pose = self.get_current_pose()
-        # Remove old data
-        old_time = time.perf_counter() - self._trajectory_length
-        self._trajectory = list(filter(lambda pose: pose.stamp > old_time, self._trajectory))
-        last_motor_cmd = self._current_motor_commands[-1]
-        self._current_motor_commands = list(
-            filter(lambda cmd: cmd.utime > old_time * 1e6, self._current_motor_commands))
-        # Add the last motor command with current time back if it was deleted
-        if len(self._current_motor_commands) == 0:
-            last_motor_cmd.utime = int(time.perf_counter() * 1e6)
-            self._current_motor_commands.append(last_motor_cmd)
+        with self._trajectory_lock:
+            # Remove old data
+            old_time = time.perf_counter() - self._trajectory_length
+            self._trajectory = list(filter(lambda pose: pose.stamp > old_time, self._trajectory))
+            last_motor_cmd = self._current_motor_commands[-1]
+            self._current_motor_commands = list(
+                filter(lambda cmd: cmd.utime > old_time * 1e6, self._current_motor_commands))
+            # Add the last motor command with current time back if it was deleted
+            if len(self._current_motor_commands) == 0:
+                last_motor_cmd.utime = int(time.perf_counter() * 1e6)
+                self._current_motor_commands.append(last_motor_cmd)
         # Render
         self._render(space_converter)
 
     def add_motor_cmd(self, cmd):
-        # Remove any poses calculated after this motor command in time
-        self._trajectory = list(filter(lambda pose: pose.stamp <= cmd.utime, self._trajectory))
-        self._current_motor_commands.append(cmd)
+        with self._trajectory_lock:
+            # Remove any poses calculated after this motor command in time
+            self._trajectory = list(filter(lambda pose: pose.stamp <= cmd.utime, self._trajectory))
+            self._current_motor_commands.append(cmd)
 
     def get_current_pose(self):
         return self.get_pose(time.perf_counter())
 
     def get_pose(self, at_time):
-        # Check if the requested time is before the oldest pose
-        earliest_time = self._trajectory[0].stamp
-        if earliest_time > at_time:
-            raise Exception("Pose at time {} is before the oldest pose in mbot trajectory ({}s long)".format(
-                at_time, self._trajectory_length))
-        # Check if the pose has already been calculated
-        newest_time = self._trajectory[-1].stamp
-        if newest_time > at_time:
-            return self._interpolate_pose(at_time)
-        # Use the motion model to predict the future
-        return self._model_motion(at_time)
+        with self._trajectory_lock:
+            # Check if the requested time is before the oldest pose
+            earliest_time = self._trajectory[0].stamp
+            if earliest_time > at_time:
+                raise Exception("Pose at time {} is before the oldest pose in mbot trajectory ({}s long)".format(
+                    at_time, self._trajectory_length))
+            # Check if the pose has already been calculated
+            newest_time = self._trajectory[-1].stamp
+            if newest_time > at_time:
+                return self._interpolate_pose(at_time)
+            # Use the motion model to predict the future
+            return self._model_motion(at_time)
 
     def _interpolate_pose(self, at_time):
         # Get the calculated pose
