@@ -3,11 +3,12 @@ from map import Map
 from mbot import Mbot
 from timing import Rate
 from lidar import Lidar
-from geometry import SpaceConverter
+import geometry
 import time
 import threading
 from pygame.locals import *
 import sys
+import numpy
 import lcm
 sys.path.append('../lcmtypes')
 from odometry_t import odometry_t
@@ -20,6 +21,11 @@ class Gui:
         self._map = None
         self._mbot = None
         self._lidar = None
+        self._use_noise = True
+        self._odom_trans_sigma = 0.001
+        self._odom_rot_sigma = 0.001
+        self._odom_pose = geometry.Pose(0, 0, 0)
+        self._last_pose = geometry.Pose(0, 0, 0)
 
         # Controller
         self._lcm = lcm.LCM("udpm://239.255.76.67:7667?ttl=2")
@@ -30,7 +36,7 @@ class Gui:
         self._motor_command_channel = 'MBOT_MOTOR_COMMAND'
         # Subscribe to lcm topics
         self._lcm.subscribe(self._motor_command_channel, self._motor_command_handler)
-        # Start callback thread
+        # LCM callback thread
         self._lcm_thread = threading.Thread(target=self._handle_lcm)
 
         # View
@@ -49,8 +55,8 @@ class Gui:
         # Map
         self._map = Map()
         self._map.load_from_file('../../data/obstacle_slam_10mx10m_5cm.map')
-        self._space_converter = SpaceConverter(self._width / (self._map.meters_per_cell * self._map.width),
-                                               (self._map._global_origin_x, self._map._global_origin_y))
+        self._space_converter = geometry.SpaceConverter(self._width / (self._map.meters_per_cell * self._map.width),
+                                                        (self._map._global_origin_x, self._map._global_origin_y))
         self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
         # Mbot
@@ -74,11 +80,20 @@ class Gui:
     def on_loop(self):
         # Publish odometry
         pose = self._mbot.get_current_pose()
+        dpose = pose - self._last_pose
+        self._odom_pose += dpose
+        if self._use_noise:
+            self._odom_pose += geometry.Pose(numpy.random.normal(0, self._odom_trans_sigma),
+                                             numpy.random.normal(0, self._odom_trans_sigma),
+                                             numpy.random.normal(0, self._odom_rot_sigma))
         msg = odometry_t()
-        msg.x = pose.x
-        msg.y = pose.y
-        msg.theta = pose.theta
+        msg.x = self._odom_pose.x
+        msg.y = self._odom_pose.y
+        msg.theta = self._odom_pose.theta
+        msg.utime = int(time.perf_counter() * 1e6)
         self._lcm.publish(self._odometry_channel, msg.encode())
+        # Update
+        self._last_pose = pose
 
     def on_execute(self):
         if self.on_init() is False:
