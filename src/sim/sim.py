@@ -32,7 +32,6 @@ class Gui:
         self._lcm.subscribe(self._motor_command_channel, self._motor_command_handler)
         # Start callback thread
         self._lcm_thread = threading.Thread(target=self._handle_lcm)
-        self._lcm_thread.start()
 
         # View
         self._running = True
@@ -63,6 +62,7 @@ class Gui:
         self._sprites.add(self._lidar)
         self._sprites.add(self._mbot)
         # Start
+        self._lcm_thread.start()
         self._running = True
 
     """ Controller """
