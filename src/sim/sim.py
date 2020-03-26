@@ -18,7 +18,8 @@ from mbot_motor_command_t import mbot_motor_command_t
 
 class Gui:
     def __init__(self, map_file, render_lidar, use_noise, lidar_dist_measure_sigma, lidar_theta_step_sigma,
-                 lidar_num_ranges_noise, odom_trans_sigma, odom_rot_sigma, width):
+                 lidar_num_ranges_noise, odom_trans_sigma, odom_rot_sigma, width, mbot_max_trans_speed,
+                 mbot_max_angular_speed):
         # Model
         self._map_file = map_file
         self._use_noise = use_noise
@@ -27,6 +28,8 @@ class Gui:
         self._lidar_num_ranges_noise = lidar_num_ranges_noise
         self._odom_trans_sigma = odom_trans_sigma
         self._odom_rot_sigma = odom_rot_sigma
+        self._mbot_max_trans_speed = mbot_max_trans_speed
+        self._mbot_max_angular_speed = mbot_max_angular_speed
         self._map = None
         self._mbot = None
         self._lidar = None
@@ -61,7 +64,8 @@ class Gui:
         self._space_converter = geometry.SpaceConverter(self._width / (self._map.meters_per_cell * self._map.width),
                                                         (self._map._global_origin_x, self._map._global_origin_y))
         # Mbot
-        self._mbot = Mbot(self._map)
+        self._mbot = Mbot(self._map, max_trans_speed=self._mbot_max_trans_speed,
+                          max_angular_speed=self._mbot_max_angular_speed)
         # Lidar
         self._lidar = Lidar(lambda at_time: self._mbot.get_pose(at_time), self._map, self._space_converter,
                             use_noise=self._use_noise, dist_measure_sigma=self._lidar_dist_measure_sigma,
@@ -187,6 +191,8 @@ def parse_args():
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry rotation')
     parser.add_argument('--width', default=640, type=int, help='Width of the screen')
+    parser.add_argument('--mbot_max_trans_speed', default=3.0, type=float, help='Mbot\'s maximum translation speed')
+    parser.add_argument('--mbot_max_angular_speed', default=3.0, type=float, help='Mbot\'s maximum angular speed')
 
     return parser.parse_args()
 
@@ -202,5 +208,7 @@ if __name__ == "__main__":
               lidar_num_ranges_noise=args.lidar_num_ranges_noise,
               odom_trans_sigma=args.odom_trans_sigma,
               odom_rot_sigma=args.odom_rot_sigma,
-              width=args.width)
+              width=args.width,
+              mbot_max_trans_speed=args.mbot_max_trans_speed,
+              mbot_max_angular_speed=args.mbot_max_angular_speed)
     sim.on_execute()

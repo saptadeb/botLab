@@ -18,7 +18,7 @@ class Mbot(pygame.sprite.Sprite):
             self.pose = pose
             self.twist = twist
 
-    def __init__(self, world_map):
+    def __init__(self, world_map, max_trans_speed, max_angular_speed):
         super(Mbot, self).__init__()
 
         # Model
@@ -36,6 +36,10 @@ class Mbot(pygame.sprite.Sprite):
         self._trajectory = [
             Mbot.State(geometry.Pose(0, 0, 0), geometry.Twist(0, 0, 0), start_time + (i * self._trajectory_step)) for i
             in range(num_steps)]
+        # TODO(???): Properly model the dependence between translation and angular speed, e.g. if at max angular speed
+        #            then translation speed must be zero
+        self._max_trans_speed = max_trans_speed
+        self._max_angular_speed = max_angular_speed
 
         # View
         self._primary_color = pygame.Color(0, 0, 255)
@@ -150,6 +154,15 @@ class Mbot(pygame.sprite.Sprite):
                 # Update last state and add to trajectory
                 start_time = cmd_time
                 final_pose = self._handle_collision(last_state.pose + dpose, last_state.twist)
+                # Clamp speed
+                if cmd.trans_v > self._max_trans_speed:
+                    cmd.trans_v = self._max_trans_speed
+                elif cmd.trans_v < -self._max_trans_speed:
+                    cmd.trans_v = -self._max_trans_speed
+                if cmd.angular_v > self._max_angular_speed:
+                    cmd.angular_v = self._max_angular_speed
+                elif cmd.angular_v < -self._max_angular_speed:
+                    cmd.angular_v = -self._max_angular_speed
                 last_state = Mbot.State(final_pose,
                                         geometry.Twist(cmd.trans_v * numpy.cos(last_state.pose.theta),
                                                        cmd.trans_v * numpy.sin(last_state.pose.theta),
