@@ -26,11 +26,15 @@ class Lidar(pygame.sprite.Sprite):
         # Lidar parameters to make it work until we can improve code
         self._num_ranges = 180
         self._thetas = [2 * math.pi * x / self._num_ranges for x in range(self._num_ranges)]  # Make random-ish
+        self._theta_step_size = 2 * math.pi / self._num_ranges
         self._max_distance = 8
         self._scan_rate = 2
         self._beam_period = 1 / (self._num_ranges * self._scan_rate)
         self._ranges = []
         self._times = []
+        self._add_noise = True
+        self._dist_measure_sigma = 0.05
+        self._theta_step_sigma = 0.1 * self._theta_step_size
 
         # Control
         self._lidar_channel = 'LIDAR'
@@ -70,12 +74,17 @@ class Lidar(pygame.sprite.Sprite):
         while self._running:
             with Rate(self._scan_rate):
                 now = time.perf_counter()
-                for beam_index in range(self._num_ranges - 1, -1, -1):
-                    theta = self._thetas[beam_index]
+                theta = numpy.random.random() * 2 * numpy.pi
+                for _ in range(self._num_ranges):
+                    self._thetas.append(theta)
                     self._ranges.append(self._beam_scan(now, theta))
                     self._times.append(int(1e6 * now))
                     now -= self._beam_period
+                    theta += self._theta_step_size
+                    if self._add_noise:
+                        theta += numpy.random.normal(0, self._theta_step_sigma)
                 self._publish()
+                self._thetas = []
                 self._ranges = []
                 self._times = []
                 # TODO(Kevin): Call in another thread
@@ -92,6 +101,11 @@ class Lidar(pygame.sprite.Sprite):
         # Ray trace along map until edge of map, max distance, or hit an object
         for x, y, dist in self._beam_step_generator(pose):
             if self._map.at_xy(x, y):
+                if self._add_noise:
+                    noise = numpy.random.normal(0, self._dist_measure_sigma)
+                    dist += noise
+                    x += numpy.cos(pose.theta) * noise
+                    y += numpy.sin(pose.theta) * noise
                 self._beam_end_poses.append((x, y))
                 # TODO(Kevin): Calculate exact distance
                 return dist
