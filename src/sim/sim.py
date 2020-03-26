@@ -18,7 +18,7 @@ class Gui:
     def __init__(self):
         # Model
         self._map = None
-        self._mbot = Mbot()
+        self._mbot = None
         self._lidar = None
 
         # Controller
@@ -54,6 +54,8 @@ class Gui:
                                                (self._map._global_origin_x, self._map._global_origin_y))
         self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
         pygame.display.flip()
+        # Mbot
+        self._mbot = Mbot(self._map)
         # Lidar
         self._lidar = Lidar(lambda at_time: self._mbot.get_pose(at_time), self._map, self._space_converter)
         self._lidar.start()

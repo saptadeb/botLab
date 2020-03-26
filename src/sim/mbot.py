@@ -17,10 +17,11 @@ class Mbot(pygame.sprite.Sprite):
             self.pose = pose
             self.twist = twist
 
-    def __init__(self):
+    def __init__(self, world_map):
         super(Mbot, self).__init__()
 
         # Model
+        self._map = world_map
         self._pose = geometry.Pose(0, 0, 0)
         stop = mbot_motor_command_t()
         stop.utime = int(0)
@@ -141,7 +142,8 @@ class Mbot(pygame.sprite.Sprite):
                 dpose = self._const_vel_motion(last_state, dt)
                 # Update last state and add to trajectory
                 start_time = cmd_time
-                last_state = Mbot.State(last_state.pose + dpose,
+                final_pose = self._handle_collision(last_state.pose + dpose, last_state.twist)
+                last_state = Mbot.State(final_pose,
                                         geometry.Twist(cmd.trans_v * numpy.cos(last_state.pose.theta),
                                                        cmd.trans_v * numpy.sin(last_state.pose.theta),
                                                        cmd.angular_v),
@@ -150,7 +152,8 @@ class Mbot(pygame.sprite.Sprite):
             # Calculate to the end of this step
             dt = end_time - start_time
             dpose = self._const_vel_motion(last_state, dt)
-            last_state = Mbot.State(last_state.pose + dpose, last_state.twist, end_time)
+            final_pose = self._handle_collision(last_state.pose + dpose, last_state.twist)
+            last_state = Mbot.State(final_pose, last_state.twist, end_time)
             self._trajectory.append(last_state)
         return last_state.pose
 
@@ -187,3 +190,9 @@ class Mbot(pygame.sprite.Sprite):
             dy = -trans_over_ang * (numpy.cos(state.twist.vtheta * dt + state.pose.theta) - numpy.cos(state.pose.theta))
 
         return geometry.Pose(dx, dy, dtheta)
+
+    def _handle_collision(self, pose, twist):
+        while self._map.at_xy(pose.x, pose.y):
+            pose.x -= twist.vx * self._trajectory_step / 3.0
+            pose.y -= twist.vy * self._trajectory_step / 3.0
+        return pose
