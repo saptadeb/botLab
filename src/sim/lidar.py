@@ -48,6 +48,10 @@ class Lidar(pygame.sprite.Sprite):
         self.image = pygame.Surface([width, height])
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
+        self._ready_to_render = False
+        self._render_beam_start_poses = []
+        self._render_beam_end_poses = []
+        self._render_lock = threading.Lock()
 
     @property
     def num_ranges(self):
@@ -91,8 +95,10 @@ class Lidar(pygame.sprite.Sprite):
                 self._thetas = []
                 self._ranges = []
                 self._times = []
-                # TODO(Kevin): Call in another thread
-                self._render(self._space_converter)
+                with self._render_lock:
+                    self._ready_to_render = True
+                    self._render_beam_start_poses = list(self._beam_start_poses)
+                    self._render_beam_end_poses = list(self._beam_end_poses)
                 self._beam_start_poses = []
                 self._beam_end_poses = []
 
@@ -144,16 +150,18 @@ class Lidar(pygame.sprite.Sprite):
 
     def _render(self, space_converter):
         self.image.fill((0, 0, 0))
-        start_pixels = numpy.ones((3, len(self._beam_start_poses)))
-        start_pixels[:2, :] = numpy.matrix(self._beam_start_poses).T
+        start_pixels = numpy.ones((3, len(self._render_beam_start_poses)))
+        start_pixels[:2, :] = numpy.matrix(self._render_beam_start_poses).T
         start_pixels = (space_converter * start_pixels)[:2, :]
 
-        end_pixels = numpy.ones((3, len(self._beam_end_poses)))
-        end_pixels[:2, :] = numpy.matrix(self._beam_end_poses).T
+        end_pixels = numpy.ones((3, len(self._render_beam_end_poses)))
+        end_pixels[:2, :] = numpy.matrix(self._render_beam_end_poses).T
         end_pixels = (space_converter * end_pixels)[:2, :]
 
         for start, end in zip(start_pixels.T.tolist(), end_pixels.T.tolist()):
             pygame.draw.line(self.image, self._beam_color, start, end)
 
     def update(self, space_converter):
-        pass
+        if self._ready_to_render:
+            with self._render_lock:
+                self._render(self._space_converter)
