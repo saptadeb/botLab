@@ -18,7 +18,7 @@ from mbot_motor_command_t import mbot_motor_command_t
 
 class Gui:
     def __init__(self, map_file, render_lidar, use_noise, lidar_dist_measure_sigma, lidar_theta_step_sigma,
-                 lidar_num_ranges_noise, odom_trans_sigma, odom_rot_sigma):
+                 lidar_num_ranges_noise, odom_trans_sigma, odom_rot_sigma, width):
         # Model
         self._map_file = map_file
         self._use_noise = use_noise
@@ -49,23 +49,17 @@ class Gui:
         self._render_lidar = render_lidar
         self._running = True
         self._display_surf = None
-        self._size = self._width, self._height = 1000, 1000
+        self._width = width
         self._sprites = pygame.sprite.RenderUpdates()
         self._max_frame_rate = 50
         self._space_converter = None
 
     def on_init(self):
-        # Pygame
-        pygame.init()
-        pygame.display.set_mode(self._size, pygame.HWSURFACE | pygame.DOUBLEBUF)
-        self._display_surf = pygame.display.get_surface()
         # Map
         self._map = Map()
         self._map.load_from_file(self._map_file)
         self._space_converter = geometry.SpaceConverter(self._width / (self._map.meters_per_cell * self._map.width),
                                                         (self._map._global_origin_x, self._map._global_origin_y))
-        self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
-        pygame.display.flip()
         # Mbot
         self._mbot = Mbot(self._map)
         # Lidar
@@ -74,6 +68,13 @@ class Gui:
                             theta_step_sigma=self._lidar_theta_step_sigma,
                             num_ranges_noise=self._lidar_num_ranges_noise)
         self._lidar.start()
+        # Pygame
+        pygame.init()
+        height = self._space_converter.to_pixel(self._map.height * self._map.meters_per_cell)
+        pygame.display.set_mode((self._width, height), pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self._display_surf = pygame.display.get_surface()
+        self._display_surf.blit(self._map.render(self._space_converter), (0, 0))
+        pygame.display.flip()
         # Add sprites
         if self._render_lidar:
             self._sprites.add(self._lidar)
@@ -185,6 +186,7 @@ def parse_args():
     parser.add_argument('--odom_rot_sigma', default=0.001, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry rotation')
+    parser.add_argument('--width', default=640, type=int, help='Width of the screen')
 
     return parser.parse_args()
 
@@ -199,5 +201,6 @@ if __name__ == "__main__":
               lidar_theta_step_sigma=args.lidar_theta_step_sigma,
               lidar_num_ranges_noise=args.lidar_num_ranges_noise,
               odom_trans_sigma=args.odom_trans_sigma,
-              odom_rot_sigma=args.odom_rot_sigma)
+              odom_rot_sigma=args.odom_rot_sigma,
+              width=args.width)
     sim.on_execute()
