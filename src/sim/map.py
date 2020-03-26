@@ -73,7 +73,7 @@ class Map:
         # Load in the map
         for row, line in enumerate(lines[1:]):
             self._occupied_cells |= {self.row_col_to_index(row, col) for col, cell in
-                enumerate(line.split()) if int(cell) > 0}
+                                     enumerate(line.split()) if int(cell) > 0}
 
     """ Data access """
     def at_xy(self, x, y):
