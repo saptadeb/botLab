@@ -98,7 +98,7 @@ class Gui:
         pose = self._mbot.get_current_pose()
         dpose = pose - self._last_pose
         self._odom_pose += dpose
-        if self._use_noise:
+        if self._use_noise and self._mbot.moving:
             self._odom_pose += geometry.Pose(numpy.random.normal(0, self._odom_trans_sigma),
                                              numpy.random.normal(0, self._odom_trans_sigma),
                                              numpy.random.normal(0, self._odom_rot_sigma))

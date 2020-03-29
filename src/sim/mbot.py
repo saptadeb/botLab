@@ -40,6 +40,7 @@ class Mbot(pygame.sprite.Sprite):
         #            then translation speed must be zero
         self._max_trans_speed = max_trans_speed
         self._max_angular_speed = max_angular_speed
+        self._moving = False
 
         # View
         self._primary_color = pygame.Color(0, 0, 255)
@@ -95,6 +96,17 @@ class Mbot(pygame.sprite.Sprite):
             # Remove any poses calculated after this motor command in time
             self._trajectory = list(filter(lambda pose: pose.stamp <= cmd.utime, self._trajectory))
             self._current_motor_commands.append(cmd)
+            self._moving = False
+            if cmd.trans_v != 0 or cmd.angular_v != 0:
+                self._moving = True
+
+    @property
+    def moving(self):
+        return self._moving
+
+    def get_last_motor_cmd(self, cmd):
+        with self._trajectory_lock:
+            return copy(self._current_motor_commands[-1])
 
     def get_current_pose(self):
         return self.get_pose(time.perf_counter())
