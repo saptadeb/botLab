@@ -21,7 +21,9 @@ RUN apt update && \
   rm -rf /var/lib/apt/lists/*
 
 # Install python software
-RUN pip3 install pygame
+RUN pip3 install \
+  pygame \
+  numpy
 
 # Install lcm
 RUN cd /tmp && \
