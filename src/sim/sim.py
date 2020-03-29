@@ -175,19 +175,19 @@ def parse_args():
     parser.add_argument('map_file', type=str, help='Load this map file into the simulator')
     parser.add_argument('--render_lidar', default=False, type=str2bool, help='Render the lidar rays')
     parser.add_argument('-n', '--use_noise', default=True, type=str2bool, help='Simulate noise')
-    parser.add_argument('--lidar_dist_measure_sigma', default=0.05, type=float,
+    parser.add_argument('--lidar_dist_measure_sigma', default=0.005, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'lidar distance measurements')
-    parser.add_argument('--lidar_theta_step_sigma', default=0.002, type=float,
+    parser.add_argument('--lidar_theta_step_sigma', default=0.0002, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'angles between each lidar scan')
     parser.add_argument('--lidar_num_ranges_noise', default=3, type=int,
                         help='Half the size of a uniform distribution centered at 0 over the integers used to '
                         'randomize the number of lidar measurements')
-    parser.add_argument('--odom_trans_sigma', default=0.001, type=float,
+    parser.add_argument('--odom_trans_sigma', default=0.0001, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry translation')
-    parser.add_argument('--odom_rot_sigma', default=0.001, type=float,
+    parser.add_argument('--odom_rot_sigma', default=0.0001, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry rotation')
     parser.add_argument('--width', default=640, type=int, help='Width of the screen')
