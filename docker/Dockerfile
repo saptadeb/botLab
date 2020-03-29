@@ -35,6 +35,7 @@ RUN cd /tmp && \
   cmake .. && \
   make && \
   make install && \
+  ldconfig && \
   cd ../lcm-python && \
   python3 setup.py install && \
   cd /tmp && \
