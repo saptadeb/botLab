@@ -97,11 +97,12 @@ class Gui:
         # Publish odometry
         pose = self._mbot.get_current_pose()
         dpose = pose - self._last_pose
-        self._odom_pose += dpose
         if self._use_noise and self._mbot.moving:
-            self._odom_pose += geometry.Pose(numpy.random.normal(0, self._odom_trans_sigma),
-                                             numpy.random.normal(0, self._odom_trans_sigma),
-                                             numpy.random.normal(0, self._odom_rot_sigma))
+            trans = numpy.sqrt(dpose.x ** 2 + dpose.y ** 2) + numpy.random.normal(0, self._odom_trans_sigma)
+            dpose.theta += numpy.random.normal(0, self._odom_rot_sigma)
+            dpose.x = trans * numpy.cos(self._odom_pose.theta + dpose.theta)
+            dpose.y = trans * numpy.sin(self._odom_pose.theta + dpose.theta)
+        self._odom_pose += dpose
         msg = odometry_t()
         msg.x = self._odom_pose.x
         msg.y = self._odom_pose.y
