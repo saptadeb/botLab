@@ -212,7 +212,8 @@ class Mbot(pygame.sprite.Sprite):
         dx = 0
         dy = 0
         dtheta = state.twist.vtheta * dt
-        if state.twist.vtheta <= angular_velocity_tolerance:  # Small values are numerically unstable so treat as 0
+        # Small values are numerically unstable so treat as 0
+        if numpy.abs(state.twist.vtheta) <= angular_velocity_tolerance:
             dx = state.twist.vx * dt
             dy = state.twist.vy * dt
             dtheta = 0
