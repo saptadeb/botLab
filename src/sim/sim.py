@@ -185,10 +185,10 @@ def parse_args():
     parser.add_argument('--lidar_num_ranges_noise', default=3, type=int,
                         help='Half the size of a uniform distribution centered at 0 over the integers used to '
                         'randomize the number of lidar measurements')
-    parser.add_argument('--odom_trans_sigma', default=0.0001, type=float,
+    parser.add_argument('--odom_trans_sigma', default=1e-3, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry translation')
-    parser.add_argument('--odom_rot_sigma', default=0.0001, type=float,
+    parser.add_argument('--odom_rot_sigma', default=3e-3, type=float,
                         help='Standard deviation of a 0 mean gaussian distribution used to add random noise to the '
                         'odometry rotation')
     parser.add_argument('--width', default=640, type=int, help='Width of the screen')
