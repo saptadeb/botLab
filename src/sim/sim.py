@@ -71,7 +71,6 @@ class Gui:
                             use_noise=self._use_noise, dist_measure_sigma=self._lidar_dist_measure_sigma,
                             theta_step_sigma=self._lidar_theta_step_sigma,
                             num_ranges_noise=self._lidar_num_ranges_noise)
-        self._lidar.start()
         # Pygame
         pygame.init()
         height = self._space_converter.to_pixel(self._map.height * self._map.meters_per_cell)
@@ -85,6 +84,7 @@ class Gui:
         self._sprites.add(self._mbot)
         # Start
         self._lcm_thread.start()
+        self._lidar.start()
         self._running = True
 
     """ Controller """
