@@ -133,7 +133,7 @@ public:
                         if (turnspeed >= 0) {
                             turnspeed = std::min(turnspeed, kTurnMaxSpeed);
                         } else {
-                            turnspeed = std::max(-turnspeed, -kTurnMaxSpeed);
+                            turnspeed = std::max(turnspeed, -kTurnMaxSpeed);
                         }
                     }
 
