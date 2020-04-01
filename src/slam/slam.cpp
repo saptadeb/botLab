@@ -176,9 +176,9 @@ bool OccupancyGridSLAM::isReadyToUpdate(void)
         // interpolation of robot motion during the scan can be performed.
         
         // Only care if there's odometry data if we aren't in mapping-only mode
-        bool haveNewOdom = (mode_ != mapping_only) && (odometryPoses_.containsPoseAtTime(nextScan.times.back()));
+        bool haveNewOdom = (mode_ != mapping_only) && (odometryPoses_.containsPoseAtTime(nextScan.times.front()));
         // Otherwise, only see if a new pose has arrived
-        bool haveNewPose = (mode_ == mapping_only) && (groundTruthPoses_.containsPoseAtTime(nextScan.times.back()));        
+        bool haveNewPose = (mode_ == mapping_only) && (groundTruthPoses_.containsPoseAtTime(nextScan.times.front()));        
 
         haveData = haveNewOdom || haveNewPose;
     }
