@@ -24,12 +24,13 @@ void Mapping::updateMap(const lidar_t& scan, const pose_xyt_t& pose, OccupancyGr
 
     MovingLaserScan movingScan(scan, previousPose_, pose);
 
+// mapping boundaries
     for(auto& ray : movingScan)
     {
         scoreEndpoint(ray, map);
     }
 
-
+// mapping the empty region
     for(auto& ray: movingScan)
     {
       scoreRay(ray,map);
