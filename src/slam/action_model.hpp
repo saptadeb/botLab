@@ -58,6 +58,10 @@ private:
     ////////// TODO: Add private member variables needed for you implementation ///////////////////
     const float k1_;
     const float k2_;
+    const float alpha1_;
+    const float alpha2_;
+    const float alpha3_;
+    const float alpha4_;
 
     pose_xyt_t  previousOdometry_;
     double      rot1_;

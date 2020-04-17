@@ -7,8 +7,12 @@
 
 
 ActionModel::ActionModel(void)
-: k1_(0.1f)
+: k1_(0.01f)
 , k2_(0.03f)
+, alpha1_(0.6f) //0.1
+, alpha2_(0.07f) //0.0001
+, alpha3_(0.8f) //0.03
+, alpha4_(0.0002f) //0.0001
 , initialized_(false)
 {
     //////////////// TODO: Handle any initialization for your ActionModel /////////////////////////
@@ -46,8 +50,9 @@ bool ActionModel::updateAction(const pose_xyt_t& odometry)
 
     trans_ *= dir;
     rot2_   = angle_diff(deltaTheta, rot1_);
-
-    if(fabs(trans_) < 0.0001f || fabs(rot2_) < 0.0001f){
+    printf("trans: %f, rot2_: %f\n", trans_, rot2_);
+    // if(fabs(trans_) < 0.0005f || fabs(rot2_) < 0.0001f){
+    if((fabs(trans_) + fabs(rot2_)) < 0.00001f){    //0.0001
         moved_ = false;
     } else{
         moved_ = true;
@@ -57,10 +62,16 @@ bool ActionModel::updateAction(const pose_xyt_t& odometry)
     // transStd_   = alpha3_*(trans_*trans_) + alpha4_*(rot1_*rot1_) + alpha4_*(rot2_*rot2_);
     // rot2Std_    = alpha1_*(rot2_*rot2_) + alpha2_*(trans_*trans_);
 
-    rot1Std_    = k1_*fabs(rot1_);
-    transStd_   = k2_*fabs(trans_);
-    rot2Std_    = k1_*fabs(rot2_);
 
+    rot1Std_    = 0.05;
+    transStd_   = 0.005;
+    rot2Std_    = 0.05;
+
+    // rot1Std_    = k1_*fabs(rot1_);
+    // transStd_   = k2_*fabs(trans_);
+    // rot2Std_    = k1_*fabs(rot2_);
+
+    // printf("rot1Std_: %f, transStd_: %f, rot2Std_: %f\n", rot1Std_, transStd_, rot2Std_);
     // particle_t sample;
     // sample.pose = odometry;
     // sample.parent_pose = previousOdometry_;

@@ -7,8 +7,8 @@
 
 Mapping::Mapping(float maxLaserDistance, int8_t hitOdds, int8_t missOdds)
 : kMaxLaserDistance_(maxLaserDistance)
-, kHitOdds_(hitOdds)
-, kMissOdds_(missOdds)
+, kHitOdds_(hitOdds)    //3
+, kMissOdds_(missOdds)  //1
 , initialized_(false)
 {
 }
@@ -17,11 +17,9 @@ Mapping::Mapping(float maxLaserDistance, int8_t hitOdds, int8_t missOdds)
 void Mapping::updateMap(const lidar_t& scan, const pose_xyt_t& pose, OccupancyGrid& map)
 {
     //////////////// TODO: Implement your occupancy grid algorithm here ///////////////////////
-    if(!initialized_)
-    {
+    if(!initialized_){
         previousPose_ = pose;
     }
-
     MovingLaserScan movingScan(scan, previousPose_, pose);
 
 // mapping boundaries
@@ -70,9 +68,6 @@ void Mapping::scoreRay(const adjusted_ray_t& ray, OccupancyGrid& map){
 
     bresenham(rayStart.x,rayStart.y,rayCell.x,rayCell.y,map);
 
-    // if(map.isCellInGrid(rayCell.x,rayCell.y)){
-    //   bresenham(rayStart.x,rayStart.y,rayCell.x,rayCell.y,map);
-    // }
   }
 }
 
@@ -90,47 +85,44 @@ void Mapping::increaseCellOdds(int x, int y, OccupancyGrid& map){
   }
 }
 
-void Mapping::bresenham(int x1,int y1,int x2,int y2,OccupancyGrid& map)
-{
-	int dx,dy,sx,sy,err,x,y;
-  float e2;
-	dx=std::abs(x2-x1);
-	dy=std::abs(y2-y1);
-  sx = x1<x2 ? 1 : -1;
-  sy = y1<y2 ? 1 : -1;
-	err = (dx) - (dy);
-  x = x1;
-  y = y1;
-
-	while(x != x2 || y != y2)
-	{
-    if(map.isCellInGrid(x,y)){
-      decreaseCellOdds(x,y,map);
+void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map){
+    if(!initialized_){
+        //do nothing
     }
-    e2 = 2*err;
-    if(e2 >= -dy)
-		{
-			err -= dy;
-      x += sx;
-		}
-		if(e2 <= dx)
-		{
-			err += dx;
-      y += sy;
-		}
-	}
+
+    else if(map(x,y) - kMissOdds_ > std::numeric_limits<CellOdds>::min()){
+        map(x,y) -= kMissOdds_;
+    }
+
+    else{
+        map(x,y) = std::numeric_limits<CellOdds>::min();
+    }
 }
 
-void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map){
-  if(!initialized_){
-    //do nothing
-  }
+void Mapping::bresenham(int x1,int y1,int x2,int y2,OccupancyGrid& map)
+{
+    int dx,dy,sx,sy,err,x,y;
+    float e2;
+    dx=std::abs(x2-x1);
+    dy=std::abs(y2-y1);
+    sx = x1<x2 ? 1 : -1;
+    sy = y1<y2 ? 1 : -1;
+    err = (dx) - (dy);
+    x = x1;
+    y = y1;
 
-  else if(map(x,y) - kMissOdds_ > std::numeric_limits<CellOdds>::min()){
-    map(x,y) -= kMissOdds_;
-  }
-
-  else{
-    map(x,y) = std::numeric_limits<CellOdds>::min();
-  }
+	while(x != x2 || y != y2){
+        if(map.isCellInGrid(x,y)){
+        decreaseCellOdds(x,y,map);
+        }
+        e2 = 2*err;
+        if(e2 >= -dy){
+            err -= dy;
+            x += sx;
+    	}
+        if(e2 <= dx){
+    		err += dx;
+            y += sy;
+    	}
+	}
 }
