@@ -43,7 +43,7 @@ void ObstacleDistanceGrid::initializeDistances(const OccupancyGrid& map)
 
     // go through all the cells
     // if is an obstacle or unknown, set to 0
-    // if is free, set to -1 to indicate unknown distance
+    // if is free, set to -1 to indicate unknown distance.
 
     cell_t cell;
 
