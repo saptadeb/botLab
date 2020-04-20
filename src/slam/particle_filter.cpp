@@ -186,6 +186,6 @@ pose_xyt_t ParticleFilter::estimatePosteriorPose(const std::vector<particle_t>& 
         weightedCos += p.weight * std::cos(p.pose.theta);
     }
     pose.theta = std::atan2(weightedSin, weightedCos);
-    printf("\npose x y %f %f %f -----", pose.x, pose.y, pose.theta);
+    // printf("\npose x y %f %f %f -----", pose.x, pose.y, pose.theta);
     return pose;
 }

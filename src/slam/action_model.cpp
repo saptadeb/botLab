@@ -50,7 +50,7 @@ bool ActionModel::updateAction(const pose_xyt_t& odometry)
 
     trans_ *= dir;
     rot2_   = angle_diff(deltaTheta, rot1_);
-    printf("trans: %f, rot2_: %f\n", trans_, rot2_);
+    // printf("trans: %f, rot2_: %f\n", trans_, rot2_);
     // if(fabs(trans_) < 0.0005f || fabs(rot2_) < 0.0001f){
     if((fabs(trans_) + fabs(rot2_)) < 0.00001f){    //0.0001
         moved_ = false;
