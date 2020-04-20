@@ -87,6 +87,10 @@ private:
     
     // Allow private write-access to cells
     float& distance(int x, int y) { return cells_[cellIndex(x, y)]; }
+
+    // initialize obstacle distance grid
+    void initializeDistances(const OccupancyGrid& map);
+
 };
 
 #endif // PLANNING_OBSTACLE_DISTANCE_GRID_HPP

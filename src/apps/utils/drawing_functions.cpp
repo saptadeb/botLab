@@ -34,7 +34,7 @@ void draw_robot(const pose_xyt_t& pose, const float* color,  const float* body_c
     vx_buffer_add_back(buffer, vxo_chain(vxo_mat_translate3(pose.x, pose.y, 0.0),
                                          vxo_mat_scale(0.1f),
                                          vxo_circle(vxo_mesh_style(body_color))));
-    
+
     vx_buffer_add_back(buffer, vxo_chain(vxo_mat_translate3(pose.x, pose.y, 0.0),
                                          vxo_mat_rotate_z(pose.theta),
                                          vxo_mat_scale(0.15f),
@@ -45,7 +45,7 @@ void draw_robot(const pose_xyt_t& pose, const float* color,  const float* body_c
 void draw_pose_trace(const PoseTrace& poses, const float* color, vx_buffer_t* buffer)
 {
     ////////////////// TODO: Draw PoseTrace as line segments connecting consecutive poses ////////////////////////////
-    
+
     // Create a resource to hold all the poses
     vx_resc* poseResc = vx_resc_createf(poses.size() * 3);
     float* poseBuf = static_cast<float*>(poseResc->res);
@@ -67,7 +67,7 @@ void draw_pose_trace(const PoseTrace& poses, const float* color, vx_buffer_t* bu
 void draw_laser_scan(const lidar_t& laser, const pose_xyt_t& pose, const float* color, vx_buffer_t* buffer)
 {
     ////////////////// TODO: Draw lidar_t as specified in assignment ////////////////////////////
-    
+
     std::vector<float> laser_points(laser.num_ranges * 4);  // x y x y x y ....
 
     for(int rayIndex = 0; rayIndex < laser.num_ranges; ++rayIndex)
@@ -77,7 +77,7 @@ void draw_laser_scan(const lidar_t& laser, const pose_xyt_t& pose, const float* 
         laser_points[rayIndex*4 + 2] = laser.ranges[rayIndex] * std::cos(-laser.thetas[rayIndex]);  // x-coordinate
         laser_points[rayIndex*4 + 3] = laser.ranges[rayIndex] * std::sin(-laser.thetas[rayIndex]);  // y-coordinate
     }
-    
+
     vx_resc* vx_laser_ray_resc = vx_resc_copyf(laser_points.data(), laser_points.size());
     vx_object_t* scan_outline = vxo_chain(vxo_mat_translate2(pose.x, pose.y),
                                           vxo_mat_rotate_z  (pose.theta),
@@ -85,7 +85,7 @@ void draw_laser_scan(const lidar_t& laser, const pose_xyt_t& pose, const float* 
                                                     laser.num_ranges*2,
                                                     GL_LINES,
                                                     vxo_lines_style(color, 1.0)));
-    
+
     vx_buffer_add_back(buffer, scan_outline);
 }
 
@@ -93,9 +93,9 @@ void draw_laser_scan(const lidar_t& laser, const pose_xyt_t& pose, const float* 
 void draw_occupancy_grid(const OccupancyGrid& grid, vx_buffer_t* buffer)
 {
     ////////////////// TODO: Draw OccupancyGrid as specified in assignment ////////////////////////////
-    
+
     image_u8_t* gridImg = image_u8_create(grid.widthInCells(), grid.heightInCells());
-    
+
     // Copy over the data -- want occupied cells black, i.e. 0 luminance, so need to invert the scale
     for(int y = 0; y < grid.heightInCells(); ++y)
     {
@@ -106,7 +106,7 @@ void draw_occupancy_grid(const OccupancyGrid& grid, vx_buffer_t* buffer)
     }
 
     vx_object_t* gridObject = vxo_image_from_u8(gridImg, 0, VX_TEX_MIN_FILTER);
-    vx_buffer_add_back(buffer, 
+    vx_buffer_add_back(buffer,
                        vxo_chain(vxo_mat_translate3(grid.originInGlobalFrame().x,
                                                     grid.originInGlobalFrame().y,
                                                     0),
@@ -126,16 +126,16 @@ void draw_particles(const particles_t& particles, vx_buffer_t* buffer)
 
     int i = 0;
     for (auto& temp : particles.particles)
-    {  
-      particle_plot[2*i] = temp.pose.x;   
+    {
+      particle_plot[2*i] = temp.pose.x;
       particle_plot[2*i + 1] = temp.pose.y;
       particle_color[4*i] = 255 * temp.weight;      //red
       particle_color[4*i + 1] = 0;    //green
       particle_color[4*i + 2] = -255*temp.weight + 255;    //blue
       particle_color[4*i + 3] = 255;  //alpha
       i++;
-    }  
-    
+    }
+
     vx_resc_t *colors = vx_resc_copyf(particle_color, total_points*4);
     vx_resc_t *estimated_poses = vx_resc_copyf(particle_plot, total_points*2);
     vx_buffer_add_back(buffer, vxo_points(estimated_poses, total_points, vxo_points_style_multi_colored(colors, 2.5f)));
@@ -145,12 +145,12 @@ void draw_particles(const particles_t& particles, vx_buffer_t* buffer)
 void draw_path(const robot_path_t& path, const float* color, vx_buffer_t* buffer)
 {
     ////////////////// TODO: Draw robot_path_t as specified in assignment ////////////////////////////
-    
+
     if(path.path_length == 0)
     {
         return;
     }
-    
+
     // Draw the path as line segments between target poses, which are drawn as little robots
     for(auto& pose : path.path)
     {
@@ -159,7 +159,7 @@ void draw_path(const robot_path_t& path, const float* color, vx_buffer_t* buffer
                                          vxo_mat_scale(0.015f),
                                          vxo_circle(vxo_mesh_style(wypnt_color))));
     }
-    
+
     vx_resc* poseResc = vx_resc_createf(path.path.size() * 3);
     float* poseBuf = static_cast<float*>(poseResc->res);
     for(auto& pose : path.path)
@@ -190,10 +190,18 @@ void draw_distance_grid(const ObstacleDistanceGrid& grid, float cspaceDistance, 
         {
             int index = x + y*img->stride;
 
-            
-            if(grid(x, y) > cspaceDistance) // free space
+
+            if(grid(x, y) > 0.35f) // free space
             {
                 img->buf[index] = 0xFFFFFFFF; // white
+            }
+            else if((grid(x, y) >= 0.15f)&&(grid(x, y) < 0.25f))
+            {
+                img->buf[index] = 0xFFFF0000; // blue
+            }
+            else if((grid(x, y) >= 0.25f)&&(grid(x, y) <= 0.35f))
+            {
+                img->buf[index] = 0xFF00FF00; // green
             }
             else if(grid(x, y) == 0.0f) // an obstacle
             {
@@ -205,9 +213,9 @@ void draw_distance_grid(const ObstacleDistanceGrid& grid, float cspaceDistance, 
             }
         }
     }
-    
+
     vx_object_t* gridObject = vxo_image_from_u32(img, 0, VX_TEX_MIN_FILTER);
-    vx_buffer_add_back(buffer, 
+    vx_buffer_add_back(buffer,
                        vxo_chain(vxo_mat_translate3(grid.originInGlobalFrame().x,
                                                     grid.originInGlobalFrame().y,
                                                     0),
@@ -218,13 +226,13 @@ void draw_distance_grid(const ObstacleDistanceGrid& grid, float cspaceDistance, 
 }
 
 
-void draw_frontiers(const std::vector<frontier_t>& frontiers, 
-                    double metersPerCell, 
-                    const float* color, 
+void draw_frontiers(const std::vector<frontier_t>& frontiers,
+                    double metersPerCell,
+                    const float* color,
                     vx_buffer_t* buffer)
 {
     //////////////////// TODO: Draw the frontiers using one box for each cell located along a frontier ////////////////
-    
+
     for(auto& f : frontiers)
     {
         for(auto& c : f.cells)
