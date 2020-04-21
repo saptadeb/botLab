@@ -1,7 +1,13 @@
 #######################################
 # Project Specific
 #######################################
+
+
+#######################################
+# LCM
+#######################################
 src/lcmtypes
+*.jlp
 
 
 #######################################
@@ -269,3 +275,5 @@ srp_md/src/srp_md/ui/pyqt_format.py
 !.vscode/extensions.json
 *.code-workspace
 
+# Botlab data folder
+botlab-data

@@ -5,8 +5,11 @@ LCMTYPES_NAMES := $(shell cd ../lcmtypes && ls *.lcm)
 # Construct the pathnames to the C types
 LCMTYPES_C := $(LCMTYPES_NAMES:%.lcm=%.c)
 LCMTYPES_C := $(addprefix lcmtypes/,$(LCMTYPES_C))
+# Construct the pathnames to the py types
+LCMTYPES_PY := $(LCMTYPES_NAMES:%.lcm=%.py)
+LCMTYPES_PY := $(addprefix lcmtypes/,$(LCMTYPES_PY))
 
-all: | lcmtypes $(LCMTYPES_C) lcmtypes/oled_message_t.py lcmtypes/exploration_status_t.py
+all: | lcmtypes $(LCMTYPES_C) $(LCMTYPES_PY)
 
 lcmtypes/%.py: ../lcmtypes/%.lcm
 	@$(LCM) -p --ppath lcmtypes $<

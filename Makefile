@@ -1,4 +1,5 @@
 SUBDIRS = src java
+LAPTOP_SUBDIRS = src src/mbot java 
 MBOT_SUBDIRS = src
 MAKEFLAGS += --no-print-directory
 
@@ -11,9 +12,8 @@ mbot-only:
 	echo "[$$dir]"; $(MAKE) -C $$dir mbot-only || exit 2; done
 
 laptop-only:
-	@for dir in $(MBOT_SUBDIRS); do \
+	@for dir in $(LAPTOP_SUBDIRS); do \
 	echo "[$$dir]"; $(MAKE) -C $$dir laptop-only || exit 2; done
-	echo "[java]"; $(MAKE) -C java all || exit 2;
 
 clean:
 	@for dir in $(SUBDIRS); do \
