@@ -3,6 +3,9 @@
 
 #include <lcmtypes/robot_path_t.hpp>
 #include <lcmtypes/pose_xyt_t.hpp>
+#include <common/point.hpp>
+#include <vector>
+using namespace std;
 
 class ObstacleDistanceGrid;
 
@@ -23,6 +26,17 @@ struct SearchParams
                                     ///< for cellDistance > minDistanceToObstacle && cellDistance < maxDistanceWithCost
 };
 
+typedef Point<int> cell_t;
+
+struct Node
+{
+    cell_t cell;            // Cell represented by this node
+    cell_t parent;
+    float gCost;        
+    float hCost;
+    float fCost = gCost + hCost;
+};
+
 
 /**
 * search_for_path uses an A* search to find a path from the start to goal poses. The search assumes a circular robot
@@ -38,5 +52,14 @@ robot_path_t search_for_path(pose_xyt_t start,
                              pose_xyt_t goal, 
                              const ObstacleDistanceGrid& distances,
                              const SearchParams& params);
+
+int get_gCost(Node parent, cell_t current);
+int get_hCost(cell_t goal, cell_t current);
+bool is_member(const cell_t toSearch_cell, vector<Node> givenList);
+Node get_member(const cell_t toSearch_cell, vector<Node> givenList);
+bool is_goal(const cell_t currCell, const cell_t goal);
+vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, const ObstacleDistanceGrid& grid);
+robot_path_t makePath(Node node, Node start, robot_path_t initPath);
+
 
 #endif // PLANNING_ASTAR_HPP

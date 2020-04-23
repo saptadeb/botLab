@@ -1,26 +1,10 @@
 #include <planning/astar.hpp>
 #include <planning/obstacle_distance_grid.hpp>
 #include <common/grid_utils.hpp>
-#include <numeric>
-#include <array>
-#include <stack>
-#include <cfloat>
 #include <iostream>
 #include <queue>
+#include <vector>
 using namespace std;
-
-typedef Point<int> cell_t;
-
-struct Node
-{
-    cell_t cell;            // Cell represented by this node
-    cell_t parent;
-    float gCost;        
-    float hCost;
-    float fCost = gCost + hCost;
-
-
-};
 
 robot_path_t search_for_path(pose_xyt_t start, 
                              pose_xyt_t goal, 
@@ -47,23 +31,27 @@ robot_path_t search_for_path(pose_xyt_t start,
     firstNode.hCost = 0;
     openList.push(firstNode);
 
+    robot_path_t path;
+    path.utime = start.utime;
+    path.path.push_back(start);    
+
     while (!openList.empty()){
         Node nNode = openList.top();
         openList.pop();
-        vector<Node> kids = expand_node(nNode);
+        vector<Node> kids = expand_node(nNode, start_cell, goal_cell, distances);
         for (auto& kid : kids){
             Node ngbr;      // neighbour
             if(is_member(kid.cell, closedList)){
                 ngbr = get_member(kid.cell, closedList);
             }else{
-                ngbr = create_node(kid.cell);
+                ngbr = kid;
             }
             if(distances.isCellInGrid(kid.cell.x,kid.cell.y) && distances(kid.cell.x,kid.cell.y) != 0){
                 ngbr.gCost = get_gCost(nNode, ngbr.cell);
                 ngbr.hCost = get_hCost(goal_cell, ngbr.cell);
-                ngbr.parent = nNode;
+                ngbr.parent = nNode.cell;
                 if (is_goal(ngbr.cell, goal_cell)){
-                    return makePath(ngbr, firstNode);
+                    return makePath(ngbr, firstNode, path);
                 }
                 if(is_member(ngbr.cell, closedList)){
                     openList.push(ngbr);
@@ -72,21 +60,13 @@ robot_path_t search_for_path(pose_xyt_t start,
         }
         closedList.push_back(nNode);
     }
-    
-
-
-
-    robot_path_t path;
-    path.utime = start.utime;
-    path.path.push_back(start);    
-    path.path_length = path.path.size();
     return path;
 }
 
 int get_gCost(Node parent, cell_t current){
     int x = abs(parent.cell.x - current.x); 
     int y = abs(parent.cell.y - current.y);
-    if(x==1 & y==1)
+    if((x == 1) & (y == 1))
         return parent.gCost + 14;
     else
         return parent.gCost + 10;
@@ -103,16 +83,16 @@ int get_hCost(cell_t goal, cell_t current){
     return cost;
 }
 
-bool is_member(const cell_t toSearch_cell, const vector<Node> givenList){
+bool is_member(const cell_t toSearch_cell, vector<Node> givenList){
     for (auto& n : givenList){
         if (n.cell.x == toSearch_cell.x && n.cell.y == toSearch_cell.y){   
-            return True;
+            return true;
         }
     }
-    return False;
+    return false;
 }
 
-Node get_member(const cell_t toSearch_cell, const vector<Node> givenList){
+Node get_member(const cell_t toSearch_cell, vector<Node> givenList){
     for (auto& n : givenList){
         if (n.cell.x == toSearch_cell.x && n.cell.y == toSearch_cell.y){   
             return n;
@@ -120,23 +100,15 @@ Node get_member(const cell_t toSearch_cell, const vector<Node> givenList){
     }
 }
 
-Node create_node(const cell_t ip_cell){
-    Node n;
-    n.cell = ip_cell;
-    n.parent = 0;
-    n.gCost = 0;
-    n.hCost = 0;
-}
-
 bool is_goal(const cell_t currCell, const cell_t goal){
     if(currCell.x == goal.x && currCell.y == goal.y){
-        return True;
+        return true;
     }
-    return False;
+    return false;
 }
 
 
-vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, ObstacleDistanceGrid& grid, ){
+vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, const ObstacleDistanceGrid& grid){
     // Perform a expansion of each cell
     const int xDeltas[8] = { 1, -1, 0,  0, 1, 1, -1, -1 };
     const int yDeltas[8] = { 0,  0, 1, -1, 1, -1, 1, -1 };
@@ -158,11 +130,24 @@ vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, Ob
     }
 }
 
-robot_path_t makePath(Node node, Node start){
+robot_path_t makePath(Node node, Node start, robot_path_t initPath){
     Node currNode = node;
-    while (currNode != start)
-    {
-        /* code */
+    int c = 0;
+    float futX, futY;
+    while (currNode.cell != start.cell){
+        pose_xyt_t temp;
+        temp.x = currNode.cell.x;
+        temp.y = currNode.cell.y;
+        if (c == 0){
+            temp.theta = 0.0;
+        }else{
+            temp.theta = atan2(futY - temp.y, futX - temp.x);
+        }
+        initPath.path.push_back(temp);
+
+        futX = temp.x;
+        futY = temp.y;
     }
-    
+    initPath.path_length = initPath.path.size();
+    return initPath;
 }
