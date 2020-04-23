@@ -39,7 +39,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     cell_t goal_cell = global_position_to_grid_position(end, distances);
 
     priority_queue<Node> openList;
-    priority_queue<Node> closedList;
+    vector<Node> closedList;
 
     Node firstNode;
     firstNode.cell = start_cell;
@@ -52,21 +52,25 @@ robot_path_t search_for_path(pose_xyt_t start,
         openList.pop();
         vector<Node> kids = expand_node(nNode);
         for (auto& kid : kids){
-            if(distances.isCellInGrid(kid.cell.x,kid.cell.y) && dis){
-                  //////// todo ////////
-
+            Node ngbr;      // neighbour
+            if(is_member(kid.cell, closedList)){
+                ngbr = get_member(kid.cell, closedList);
+            }else{
+                ngbr = create_node(kid.cell);
             }
-
-
+            if(distances.isCellInGrid(kid.cell.x,kid.cell.y) && distances(kid.cell.x,kid.cell.y) != 0){
+                ngbr.gCost = get_gCost(nNode, ngbr.cell);
+                ngbr.hCost = get_hCost(goal_cell, ngbr.cell);
+                ngbr.parent = nNode;
+                if (is_goal(ngbr.cell, goal_cell)){
+                    return makePath(ngbr, firstNode);
+                }
+                if(is_member(ngbr.cell, closedList)){
+                    openList.push(ngbr);
+                }
+            }
         }
-        kid.gCost = get_gCost(currentNode, kid.cell);
-        kid.hCost = get_hCost(goalCell, kid.cell);
-
-
-
-        
-
-
+        closedList.push_back(nNode);
     }
     
 
@@ -99,16 +103,37 @@ int get_hCost(cell_t goal, cell_t current){
     return cost;
 }
 
-// bool is_member(Node toSearch, priority_queue<Node> givenList){
-//     for (vector<Node>::iterator it = givenList.top(); it != givenList.end(); it++){
+bool is_member(const cell_t toSearch_cell, const vector<Node> givenList){
+    for (auto& n : givenList){
+        if (n.cell.x == toSearch_cell.x && n.cell.y == toSearch_cell.y){   
+            return True;
+        }
+    }
+    return False;
+}
 
-//         if (cell_x == node.x) & (cell_y == node.y){
-//             return True;
-//         }
-//     }
-        
-//     return False;
-// }
+Node get_member(const cell_t toSearch_cell, const vector<Node> givenList){
+    for (auto& n : givenList){
+        if (n.cell.x == toSearch_cell.x && n.cell.y == toSearch_cell.y){   
+            return n;
+        }
+    }
+}
+
+Node create_node(const cell_t ip_cell){
+    Node n;
+    n.cell = ip_cell;
+    n.parent = 0;
+    n.gCost = 0;
+    n.hCost = 0;
+}
+
+bool is_goal(const cell_t currCell, const cell_t goal){
+    if(currCell.x == goal.x && currCell.y == goal.y){
+        return True;
+    }
+    return False;
+}
 
 
 vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, ObstacleDistanceGrid& grid, ){
@@ -133,6 +158,11 @@ vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, Ob
     }
 }
 
-robot_path_t makePath(Node kid){
-
+robot_path_t makePath(Node node, Node start){
+    Node currNode = node;
+    while (currNode != start)
+    {
+        /* code */
+    }
+    
 }
