@@ -173,7 +173,7 @@ void expand_node(const DistanceNode& node,
             adjacentNode.cell = adjacentCell;
             if(grid(adjacentCell.x, adjacentCell.y) == -1)
             {
-                adjacentNode.distance = node.distance + 0.1f;
+                adjacentNode.distance = node.distance + 0.1f;  // should be 0.05
                 grid(adjacentCell.x, adjacentCell.y) = adjacentNode.distance;
                 searchQueue.push(adjacentNode);
             }
