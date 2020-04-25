@@ -13,60 +13,30 @@ robot_path_t search_for_path(pose_xyt_t start,
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
     
-    //defining home cell and end point
-    Node home, end;
+    //defining home and end point
+    cell_t home, end;
+    home.x = start.x;
+    home.y = start.y;
+    end.x = goal.x;
+    end.y = goal.y;
+    cell_t start_cell = global_position_to_grid_cell(home, distances);
+    Point<double> goal_point = global_position_to_grid_position(end, distances);
     
-    // initializing open and closed list
+    // printf("%d", );
+
     priority_queue<Node> openList;
     vector<Node> closedList;
 
-    robot_path_t path;
-    path.utime = start.utime;
-    path.path.push_back(start);  
-    
-    home.cell.x = start.x;
-    home.cell.y = start.y;
-    end.cell.x = goal.x;
-    end.cell.y = goal.y;
-    home.cell = global_position_to_grid_cell(home.cell, distances);
-    end.cell = global_position_to_grid_position(end.cell, distances);
-    
-    // check conditions!!
-    // VALID GOAL
-    if (!isValid(end.cell, distances, params.minDistanceToObstacle)){
-		printf("Destination is cannot be reached\n");
-		path.path_length = path.path.size();
-		return path;
-    }  
-    // VALID HOME	
-	if (!isValid(home.cell, distances, params.minDistanceToObstacle)){
-		printf("Origin is invalid\n");
-		path.path_length = path.path.size();
-		return path;
-    } 
-    // If Home == Goal
-	if(isDestination(home.cell, end.cell)){
-        printf("Already at Destination\n");
-		path.path_length = path.path.size();
-        return path;
-    }
-	
-	if(!distances.isCellInGrid(end.cell.x, end.cell.y) || 
-        !distances.isCellInGrid(home.cell.x, home.cell.y)){
-		printf("Start or Destination not in grid %f\n",distances.(home.cell.x, home.cell.y));
-		path.path_length = path.path.size();
-        return path;
-	}
-
-
     Node firstNode;
-    firstNode.cell = home.cell;
+    firstNode.cell = start_cell;
     firstNode.gCost = 0;
     firstNode.hCost = 0;
+    firstNode.fCost += pow(params.maxDistanceWithCost - distances(firstNode.cell.x, firstNode.cell.y), params.distanceCostExponent);
     openList.push(firstNode);
 
-    bool destinationFound = false;
-      
+    robot_path_t path;
+    path.utime = start.utime;
+    path.path.push_back(start);    
 
     while (!openList.empty()){
         Node nNode = openList.top();
@@ -79,20 +49,15 @@ robot_path_t search_for_path(pose_xyt_t start,
             }else{
                 ngbr = kid;
             }
-            if(isValid(ngbr.cell, distances, params.minDistanceToObstacle))
-                if (is_goal(ngbr.cell, end.cell)){
-                    destinationFound = true;
-                    printf("Found Path \n");
-                    path.utime = start.utime;
-                    return makePath(ngbr, firstNode, path, distances);
-                }
-                
+            if(distances.isCellInGrid(kid.cell.x,kid.cell.y) && distances(kid.cell.x,kid.cell.y) != 0){
                 ngbr.gCost = get_gCost(nNode, ngbr.cell);
-                ngbr.hCost = get_hCost(end.cell, ngbr.cell);
+                ngbr.hCost = get_hCost(goal_point, ngbr.cell);
                 if (distances(ngbr.cell.x, ngbr.cell.y) > params.minDistanceToObstacle && distances(ngbr.cell.x, ngbr.cell.y) < params.maxDistanceWithCost)
                     ngbr.fCost += pow(params.maxDistanceWithCost - distances(ngbr.cell.x, ngbr.cell.y), params.distanceCostExponent);
-                // ngbr.parent = nNode.cell;
-                
+                ngbr.parent = nNode.cell;
+                if (is_goal(ngbr.cell, goal_point)){
+                    return makePath(ngbr, firstNode, path, distances);
+                }
                 if(is_member(ngbr.cell, closedList)){
                     openList.push(ngbr);
                 }
@@ -102,31 +67,6 @@ robot_path_t search_for_path(pose_xyt_t start,
     }
     return path;
 }
-
-// to check if cell is not obstacle and is in the cellgrid
-bool isValid(cell_t givenCell, const ObstacleDistanceGrid& distances, const double minDist) { 
-	//printf("%d,%d: %f, %f\n", x,y,distances.operator()(x,y), minDist);
-	if (distances(givenCell.x, givenCell.y) >  minDist*1.000001) {
-		//printf("%f\n", minDist * distances.cellsPerMeter());
-		if (givenCell.x < 0 || givenCell.y < 0 || givenCell.x >= (distances.widthInCells()) || 
-            givenCell.y >= (distances.heightInCells())) {
-            return false;
-        }
-        return true;
-    } 
-	//printf("%d,%d: %f\n", x,y,distances.operator()(x,y));
-    return false;
-}
-
-bool isDestination(cell_t home, cell_t goal) 
-{
-    if (home.x == goal.x && home.y == goal.y) {
-        return true;
-    }
-    return false;
-}
-
-
 
 int get_gCost(Node parent, cell_t current){
     int x = abs(parent.cell.x - current.x); 
@@ -180,7 +120,7 @@ vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid){
     
     vector<Node> kids;
     
-    for(int n = 0; n < 8; ++n)          //CHANGE TO 8 TO INCLUDE DIAGONALS AS WELL
+    for(int n = 0; n < 4; ++n)          //CHANGE TO 8 TO INCLUDE DIAGONALS AS WELL
     {
         cell_t adjacentCell(currentNode.cell.x + xDeltas[n], currentNode.cell.y + yDeltas[n]);
 
@@ -215,10 +155,6 @@ robot_path_t makePath(Node node, Node start, robot_path_t initPath, const Obstac
         initPath.path.push_back(nextPoint);
         futX = temp.x;
         futY = temp.y;
-        currNode.cell = currNode.parent;
-
-        // if (!isValid())
-
     }
     initPath.path_length = initPath.path.size();
     return initPath;

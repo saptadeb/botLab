@@ -34,9 +34,9 @@ struct Node{
     float gCost;        
     float hCost;
     float fCost = gCost + hCost;
-    bool operator<(const Node& rhs) const
+    bool operator < (const Node& lhs, const Node& rhs) const
     {
-        return rhs.fCost < fCost;
+        return lhs.fCost < rhs.fCost;
     }
 };
 
