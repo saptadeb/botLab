@@ -19,8 +19,10 @@ robot_path_t search_for_path(pose_xyt_t start,
     home.y = start.y;
     end.x = goal.x;
     end.y = goal.y;
-    cell_t start_cell = global_position_to_grid_position(home, distances);
-    cell_t goal_cell = global_position_to_grid_position(end, distances);
+    cell_t start_cell = global_position_to_grid_cell(home, distances);
+    Point<double> goal_point = global_position_to_grid_position(end, distances);
+    
+    printf("%d", );
 
     priority_queue<Node> openList;
     vector<Node> closedList;
@@ -29,6 +31,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     firstNode.cell = start_cell;
     firstNode.gCost = 0;
     firstNode.hCost = 0;
+    firstNode.fCost += pow(params.maxDistanceWithCost - distances(firstNode.cell.x, firstNode.cell.y), params.distanceCostExponent);
     openList.push(firstNode);
 
     robot_path_t path;
@@ -38,7 +41,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     while (!openList.empty()){
         Node nNode = openList.top();
         openList.pop();
-        vector<Node> kids = expand_node(nNode, start_cell, goal_cell, distances);
+        vector<Node> kids = expand_node(nNode, distances);
         for (auto& kid : kids){
             Node ngbr;      // neighbour
             if(is_member(kid.cell, closedList)){
@@ -48,10 +51,12 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
             if(distances.isCellInGrid(kid.cell.x,kid.cell.y) && distances(kid.cell.x,kid.cell.y) != 0){
                 ngbr.gCost = get_gCost(nNode, ngbr.cell);
-                ngbr.hCost = get_hCost(goal_cell, ngbr.cell);
+                ngbr.hCost = get_hCost(goal_point, ngbr.cell);
+                if (distances(ngbr.cell.x, ngbr.cell.y) > params.minDistanceToObstacle && distances(ngbr.cell.x, ngbr.cell.y) < params.maxDistanceWithCost)
+                    ngbr.fCost += pow(params.maxDistanceWithCost - distances(ngbr.cell.x, ngbr.cell.y), params.distanceCostExponent);
                 ngbr.parent = nNode.cell;
-                if (is_goal(ngbr.cell, goal_cell)){
-                    return makePath(ngbr, firstNode, path);
+                if (is_goal(ngbr.cell, goal_point)){
+                    return makePath(ngbr, firstNode, path, distances);
                 }
                 if(is_member(ngbr.cell, closedList)){
                     openList.push(ngbr);
@@ -72,7 +77,7 @@ int get_gCost(Node parent, cell_t current){
         return parent.gCost + 10;
 }
 
-int get_hCost(cell_t goal, cell_t current){
+int get_hCost(Point<double> goal, cell_t current){
     int x = abs(goal.x - current.x);
     int y = abs(goal.y - current.y);
     int cost;
@@ -100,15 +105,15 @@ Node get_member(const cell_t toSearch_cell, vector<Node> givenList){
     }
 }
 
-bool is_goal(const cell_t currCell, const cell_t goal){
-    if(currCell.x == goal.x && currCell.y == goal.y){
+bool is_goal(const cell_t currCell, const Point<double> goalPt){
+    if(currCell.x == goalPt.x && currCell.y == goalPt.y){
         return true;
     }
     return false;
 }
 
 
-vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, const ObstacleDistanceGrid& grid){
+vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid){
     // Perform a expansion of each cell
     const int xDeltas[8] = { 1, -1, 0,  0, 1, 1, -1, -1 };
     const int yDeltas[8] = { 0,  0, 1, -1, 1, -1, 1, -1 };
@@ -130,21 +135,24 @@ vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, co
     }
 }
 
-robot_path_t makePath(Node node, Node start, robot_path_t initPath){
+robot_path_t makePath(Node node, Node start, robot_path_t initPath, const ObstacleDistanceGrid& distances){
     Node currNode = node;
     int c = 0;
     float futX, futY;
     while (currNode.cell != start.cell){
-        pose_xyt_t temp;
+        Point<double> temp;
         temp.x = currNode.cell.x;
         temp.y = currNode.cell.y;
+        Point<double> temp2 = grid_position_to_global_position(temp, distances);
+        pose_xyt_t nextPoint;
+        nextPoint.x = temp2.x;
+        nextPoint.y = temp2.y;
         if (c == 0){
-            temp.theta = 0.0;
+            nextPoint.theta = 0.0;
         }else{
-            temp.theta = atan2(futY - temp.y, futX - temp.x);
-        }
-        initPath.path.push_back(temp);
-
+            nextPoint.theta = atan2(futY - temp.y, futX - temp.x);
+        }                
+        initPath.path.push_back(nextPoint);
         futX = temp.x;
         futY = temp.y;
     }

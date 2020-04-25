@@ -28,13 +28,16 @@ struct SearchParams
 
 typedef Point<int> cell_t;
 
-struct Node
-{
+struct Node{
     cell_t cell;            // Cell represented by this node
     cell_t parent;
     float gCost;        
     float hCost;
     float fCost = gCost + hCost;
+    bool operator<(const Node& rhs) const
+    {
+        return rhs.fCost < fCost;
+    }
 };
 
 
@@ -54,12 +57,12 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const SearchParams& params);
 
 int get_gCost(Node parent, cell_t current);
-int get_hCost(cell_t goal, cell_t current);
+int get_hCost(Point<double> goal, cell_t current);
 bool is_member(const cell_t toSearch_cell, vector<Node> givenList);
 Node get_member(const cell_t toSearch_cell, vector<Node> givenList);
-bool is_goal(const cell_t currCell, const cell_t goal);
-vector<Node> expand_node(Node currentNode, cell_t startCell, cell_t goalCell, const ObstacleDistanceGrid& grid);
-robot_path_t makePath(Node node, Node start, robot_path_t initPath);
+bool is_goal(const cell_t currCell, const Point<double> goalPt);
+vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid);
+robot_path_t makePath(Node node, Node start, robot_path_t initPath, const ObstacleDistanceGrid& distances);
 
 
 #endif // PLANNING_ASTAR_HPP

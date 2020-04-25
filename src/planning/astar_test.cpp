@@ -414,11 +414,11 @@ void print_timing_info(timing_info_t& info)
         TimingAcc acc;
         std::for_each(times.second.begin(), times.second.end(), std::ref(acc));
         
-        std::cout << times.first << " :: (us)\n"
-            << "\tMin :    " << min(acc) << '\n'
-            << "\tMean:    " << mean(acc) << '\n'
-            << "\tMax:     " << max(acc) << '\n'
-            << "\tMedian:  " << median(acc) << '\n'
-            << "\tStd dev: " << std::sqrt(variance(acc)) << '\n'; 
+        // std::cout << times.first << " :: (us)\n"
+        //     << "\tMin :    " << min(acc) << '\n'
+        //     << "\tMean:    " << mean(acc) << '\n'
+        //     << "\tMax:     " << max(acc) << '\n'
+        //     << "\tMedian:  " << median(acc) << '\n'
+        //     << "\tStd dev: " << std::sqrt(variance(acc)) << '\n'; 
     }
 }
