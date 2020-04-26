@@ -4,6 +4,7 @@
 #include <iostream>
 #include <queue>
 #include <vector>
+#include <stack>
 using namespace std;
 
 robot_path_t search_for_path(pose_xyt_t start, 
@@ -13,94 +14,148 @@ robot_path_t search_for_path(pose_xyt_t start,
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
     
-    //defining home cell and end point
-    Node home, end;
-    
+    printf("\nin global Start x: %f, y: %f --- Goal x: %f,y: %f\n",start.x,start.y,goal.x,goal.y);
     // initializing open and closed list
-    priority_queue<Node> openList;
+    priority_queue<Node, vector<Node>, greater<Node>> openList;
     vector<Node> closedList;
 
     robot_path_t path;
     path.utime = start.utime;
     path.path.push_back(start);  
     
-    home.cell.x = start.x;
-    home.cell.y = start.y;
-    end.cell.x = goal.x;
-    end.cell.y = goal.y;
-    home.cell = global_position_to_grid_cell(home.cell, distances);
-    end.cell = global_position_to_grid_position(end.cell, distances);
-    
+    Point<double> goalPoint;
+    goalPoint.x = goal.x;
+    goalPoint.y = goal.y;
+    cell_t end = global_position_to_grid_cell(goalPoint, distances);
+
+
+    Point<double> startPoint;
+    startPoint.x = start.x;
+    startPoint.y = start.y;
+    double initialtheta = start.theta;
+    cell_t startCell = global_position_to_grid_cell(startPoint, distances);
+
+    printf("in cell Start x: %d, y: %d --- Goal x: %d,y: %d\n",startCell.x,startCell.y,end.x,end.y);
+
+
     // check conditions!!
     // VALID GOAL
-    if (!isValid(end.cell, distances, params.minDistanceToObstacle)){
+    if (!isValid(end, distances, params.minDistanceToObstacle)){
 		printf("Destination is cannot be reached\n");
 		path.path_length = path.path.size();
 		return path;
     }  
     // VALID HOME	
-	if (!isValid(home.cell, distances, params.minDistanceToObstacle)){
+	if (!isValid(startCell, distances, params.minDistanceToObstacle)){
 		printf("Origin is invalid\n");
 		path.path_length = path.path.size();
 		return path;
     } 
     // If Home == Goal
-	if(isDestination(home.cell, end.cell)){
+	if(isDestination(startCell, end)){
         printf("Already at Destination\n");
 		path.path_length = path.path.size();
         return path;
     }
 	
-	if(!distances.isCellInGrid(end.cell.x, end.cell.y) || 
-        !distances.isCellInGrid(home.cell.x, home.cell.y)){
-		printf("Start or Destination not in grid %f\n",distances.(home.cell.x, home.cell.y));
+	if(!distances.isCellInGrid(end.x, end.y) || !distances.isCellInGrid(startCell.x, startCell.y)){
+		// printf("Start or Destination not in grid %f\n",distances.(startCell.x, startCell.y));
 		path.path_length = path.path.size();
         return path;
 	}
 
 
     Node firstNode;
-    firstNode.cell = home.cell;
+    firstNode.cell = startCell;
     firstNode.gCost = 0;
     firstNode.hCost = 0;
+    firstNode.fCost = 0;
     openList.push(firstNode);
 
     bool destinationFound = false;
       
 
     while (!openList.empty()){
+        int breakcount = 0;
         Node nNode = openList.top();
+        closedList.push_back(nNode);
         openList.pop();
         vector<Node> kids = expand_node(nNode, distances);
+        vector<Node> templist = closedList;
+        Node tempnode;
+        // printf("\nClosedList \n");
+        for (auto& element : templist) {
+            // printf("node x: %d y: %d -- parent x: %d y: %d\n", element.cell.x, element.cell.y, element.parent.x, element.parent.y);
+        }
+        // printf("Node ----- x: %d, y: %d\n", nNode.cell.x, nNode.cell.y);   
+
+        priority_queue<Node, vector<Node>, greater<Node>> tempopen = openList;
+        Node opennode;
+        // printf("\nOPENLIST \n");
+        while (!tempopen.empty()){
+			opennode = tempopen.top();
+            // printf("x: %d, y: %d, fcost: %d, gcost: %d\n", opennode.cell.x, opennode.cell.y, opennode.fCost, opennode.gCost);
+			tempopen.pop();
+		}
+
+        // breakcount++;
+        // if (breakcount == 2)
+        // {
+        //     break;
+        // }
+
         for (auto& kid : kids){
             Node ngbr;      // neighbour
             if(is_member(kid.cell, closedList)){
+                // printf("IS MEMBER??\n");
                 ngbr = get_member(kid.cell, closedList);
             }else{
                 ngbr = kid;
+                ngbr.fCost = INT16_MAX;
             }
-            if(isValid(ngbr.cell, distances, params.minDistanceToObstacle))
-                if (is_goal(ngbr.cell, end.cell)){
+            // printf("Neighbour ----- x: %d, y: %d\n", ngbr.cell.x, ngbr.cell.y);
+            if(isValid(ngbr.cell, distances, params.minDistanceToObstacle)){
+                // printf("first if\n");             
+                if (is_goal(ngbr.cell, end)){
+                    printf("isgoal if \n");
+                    robot_path_t usablePath;
+                    usablePath.utime = start.utime;
+                    usablePath.path.push_back(start);  
                     destinationFound = true;
                     printf("Found Path \n");
-                    path.utime = start.utime;
-                    return makePath(ngbr, firstNode, path, distances);
+                    return makePath(ngbr, firstNode, initialtheta, usablePath, distances, closedList);
                 }
                 
-                ngbr.gCost = get_gCost(nNode, ngbr.cell);
-                ngbr.hCost = get_hCost(end.cell, ngbr.cell);
-                if (distances(ngbr.cell.x, ngbr.cell.y) > params.minDistanceToObstacle && distances(ngbr.cell.x, ngbr.cell.y) < params.maxDistanceWithCost)
-                    ngbr.fCost += pow(params.maxDistanceWithCost - distances(ngbr.cell.x, ngbr.cell.y), params.distanceCostExponent);
-                // ngbr.parent = nNode.cell;
+                int gNew, hNew, fNew, obstacleCost = 0;
+                gNew = get_gCost(nNode, ngbr.cell);
+                hNew = get_hCost(end, ngbr.cell);
+                obstacleCost = get_oCost(ngbr.cell, params, distances);
+                fNew = gNew + hNew + obstacleCost;
+
+                // printf("gnew: %d, hnew: %d, fnew: %d, gCost: %d, hCost: %d, fCost: %d\n", gNew, hNew, fNew, ngbr.gCost, ngbr.hCost, ngbr.fCost);
                 
-                if(is_member(ngbr.cell, closedList)){
-                    openList.push(ngbr);
+                if(!is_member(ngbr.cell, closedList)){
+                    if(ngbr.fCost > fNew){
+                        ngbr.gCost = gNew;
+                        ngbr.hCost = hNew;
+                        ngbr.fCost = fNew;
+                        ngbr.parent = nNode.cell;
+                        openList.push(ngbr);
+                    }
+                    
                 }
+                
             }
         }
-        closedList.push_back(nNode);
+
+        // break;
+        
+
+
+        // printf("%f \n", openList);
     }
-    return path;
+    // printf("path: %f", path.path);
+    //return path;
 }
 
 // to check if cell is not obstacle and is in the cellgrid
@@ -148,6 +203,13 @@ int get_hCost(Point<double> goal, cell_t current){
     return cost;
 }
 
+int get_oCost(cell_t cell, const SearchParams& params, const ObstacleDistanceGrid& distances){
+    int obstacleCost = 0;
+    if (distances(cell.x, cell.y) > params.minDistanceToObstacle && distances(cell.x, cell.y) < params.maxDistanceWithCost)
+        obstacleCost = static_cast<int>(pow(params.maxDistanceWithCost - distances(cell.x, cell.y)*200, params.distanceCostExponent));
+    return obstacleCost;
+}
+
 bool is_member(const cell_t toSearch_cell, vector<Node> givenList){
     for (auto& n : givenList){
         if (n.cell.x == toSearch_cell.x && n.cell.y == toSearch_cell.y){   
@@ -191,35 +253,50 @@ vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid){
             kid.cell = adjacentCell;
             kids.push_back(kid);
         }
-    return kids;    
     }
+    return kids;    
 }
 
-robot_path_t makePath(Node node, Node start, robot_path_t initPath, const ObstacleDistanceGrid& distances){
-    Node currNode = node;
+robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usablePath, const ObstacleDistanceGrid& distances, vector<Node> CL){
+    printf("-------MAKE PATH------");
+    stack<pose_xyt_t> initPath;
     int c = 0;
-    float futX, futY;
-    while (currNode.cell != start.cell){
+    float prevX, prevY;
+    // printf("goal to start -- > \n");
+    Node tempnode = goal;
+    // printf("end x: %d y: %d ---- \n",  tempnode.cell.x,  tempnode.cell.y);
+    // printf("start x: %d y: %d ---- \n",  start.cell.x,  start.cell.y);
+
+    while (!(tempnode.cell.x == start.cell.x && tempnode.cell.y == start.cell.y)){
         Point<double> temp;
-        temp.x = currNode.cell.x;
-        temp.y = currNode.cell.y;
+        temp.x = tempnode.cell.x;
+        temp.y = tempnode.cell.y;
+        printf("PATH POINT -- x: %f, y: %f \n", temp.x, temp.y);
+
         Point<double> temp2 = grid_position_to_global_position(temp, distances);
         pose_xyt_t nextPoint;
         nextPoint.x = temp2.x;
         nextPoint.y = temp2.y;
         if (c == 0){
-            nextPoint.theta = 0.0;
-        }else{
-            nextPoint.theta = atan2(futY - temp.y, futX - temp.x);
-        }                
-        initPath.path.push_back(nextPoint);
-        futX = temp.x;
-        futY = temp.y;
-        currNode.cell = currNode.parent;
-
-        // if (!isValid())
-
+            nextPoint.theta = initTheta;
+            c++;
+        }else
+            nextPoint.theta = atan2(prevY - temp.y, prevX - temp.x);          
+        initPath.push(nextPoint);
+        prevX = temp.x;
+        prevY = temp.y;
+        // printf("PARENT x: %f y: %f ---- \n", node.parent.x, node.parent.y);
+        tempnode = get_member(tempnode.parent, CL);
     }
-    initPath.path_length = initPath.path.size();
-    return initPath;
+    // initPath.path_length = initPath.path.size();
+
+    while (!initPath.empty())
+    {
+        pose_xyt_t top = initPath.top();
+        
+        initPath.pop();
+        usablePath.path.emplace_back(top);
+    }
+    usablePath.path_length = usablePath.path.size();
+    return usablePath;
 }

@@ -31,12 +31,16 @@ typedef Point<int> cell_t;
 struct Node{
     cell_t cell;            // Cell represented by this node
     cell_t parent;
-    float gCost;        
-    float hCost;
-    float fCost = gCost + hCost;
-    bool operator < (const Node& lhs, const Node& rhs) const
+    int gCost;        
+    int hCost;
+    int fCost;
+    bool operator<(const Node& rhs) const
     {
-        return lhs.fCost < rhs.fCost;
+        return fCost < rhs.fCost;
+    }
+    bool operator>(const Node& rhs) const
+    {
+        return fCost > rhs.fCost;
     }
 };
 
@@ -56,13 +60,16 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const ObstacleDistanceGrid& distances,
                              const SearchParams& params);
 
+bool isValid(cell_t givenCell, const ObstacleDistanceGrid& distances, const double minDist);
+bool isDestination(cell_t home, cell_t goal); 
 int get_gCost(Node parent, cell_t current);
 int get_hCost(Point<double> goal, cell_t current);
+int get_oCost(cell_t cell, const SearchParams& params, const ObstacleDistanceGrid& distances);
 bool is_member(const cell_t toSearch_cell, vector<Node> givenList);
 Node get_member(const cell_t toSearch_cell, vector<Node> givenList);
 bool is_goal(const cell_t currCell, const Point<double> goalPt);
 vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid);
-robot_path_t makePath(Node node, Node start, robot_path_t initPath, const ObstacleDistanceGrid& distances);
+robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usablePath, const ObstacleDistanceGrid& distances, vector<Node> CL);
 
 
 #endif // PLANNING_ASTAR_HPP
