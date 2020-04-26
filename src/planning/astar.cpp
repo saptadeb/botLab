@@ -11,9 +11,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                              pose_xyt_t goal, 
                              const ObstacleDistanceGrid& distances,
                              const SearchParams& params)
-{
-    ////////////////// TODO: Implement your A* search here //////////////////////////
-    
+{  
     printf("\nin global Start x: %f, y: %f --- Goal x: %f,y: %f\n",start.x,start.y,goal.x,goal.y);
     // initializing open and closed list
     priority_queue<Node, vector<Node>, greater<Node>> openList;
@@ -59,7 +57,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     }
 	
 	if(!distances.isCellInGrid(end.x, end.y) || !distances.isCellInGrid(startCell.x, startCell.y)){
-		// printf("Start or Destination not in grid %f\n",distances.(startCell.x, startCell.y));
+		printf("Start or Destination not in grid %f\n");
 		path.path_length = path.path.size();
         return path;
 	}
@@ -97,17 +95,9 @@ robot_path_t search_for_path(pose_xyt_t start,
             // printf("x: %d, y: %d, fcost: %d, gcost: %d\n", opennode.cell.x, opennode.cell.y, opennode.fCost, opennode.gCost);
 			tempopen.pop();
 		}
-
-        // breakcount++;
-        // if (breakcount == 2)
-        // {
-        //     break;
-        // }
-
         for (auto& kid : kids){
             Node ngbr;      // neighbour
             if(is_member(kid.cell, closedList)){
-                // printf("IS MEMBER??\n");
                 ngbr = get_member(kid.cell, closedList);
             }else{
                 ngbr = kid;
@@ -115,9 +105,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
             // printf("Neighbour ----- x: %d, y: %d\n", ngbr.cell.x, ngbr.cell.y);
             if(isValid(ngbr.cell, distances, params.minDistanceToObstacle)){
-                // printf("first if\n");             
                 if (is_goal(ngbr.cell, end)){
-                    printf("isgoal if \n");
                     robot_path_t usablePath;
                     usablePath.utime = start.utime;
                     usablePath.path.push_back(start);  
@@ -142,34 +130,22 @@ robot_path_t search_for_path(pose_xyt_t start,
                         ngbr.parent = nNode.cell;
                         openList.push(ngbr);
                     }
-                    
-                }
-                
+                } 
             }
         }
-
-        // break;
-        
-
-
-        // printf("%f \n", openList);
     }
-    // printf("path: %f", path.path);
-    //return path;
+
 }
 
 // to check if cell is not obstacle and is in the cellgrid
 bool isValid(cell_t givenCell, const ObstacleDistanceGrid& distances, const double minDist) { 
-	//printf("%d,%d: %f, %f\n", x,y,distances.operator()(x,y), minDist);
 	if (distances(givenCell.x, givenCell.y) >  minDist*1.000001) {
-		//printf("%f\n", minDist * distances.cellsPerMeter());
 		if (givenCell.x < 0 || givenCell.y < 0 || givenCell.x >= (distances.widthInCells()) || 
             givenCell.y >= (distances.heightInCells())) {
             return false;
         }
         return true;
     } 
-	//printf("%d,%d: %f\n", x,y,distances.operator()(x,y));
     return false;
 }
 
@@ -262,10 +238,8 @@ robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usab
     stack<pose_xyt_t> initPath;
     int c = 0;
     float prevX, prevY;
-    // printf("goal to start -- > \n");
+
     Node tempnode = goal;
-    // printf("end x: %d y: %d ---- \n",  tempnode.cell.x,  tempnode.cell.y);
-    // printf("start x: %d y: %d ---- \n",  start.cell.x,  start.cell.y);
 
     while (!(tempnode.cell.x == start.cell.x && tempnode.cell.y == start.cell.y)){
         Point<double> temp;
@@ -288,12 +262,10 @@ robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usab
         // printf("PARENT x: %f y: %f ---- \n", node.parent.x, node.parent.y);
         tempnode = get_member(tempnode.parent, CL);
     }
-    // initPath.path_length = initPath.path.size();
 
     while (!initPath.empty())
     {
         pose_xyt_t top = initPath.top();
-        
         initPath.pop();
         usablePath.path.emplace_back(top);
     }
