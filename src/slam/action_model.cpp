@@ -58,25 +58,11 @@ bool ActionModel::updateAction(const pose_xyt_t& odometry)
         moved_ = true;
     }
 
-    // rot1Std_    = alpha1_*(rot1_*rot1_) + alpha2_*(trans_*trans_);
-    // transStd_   = alpha3_*(trans_*trans_) + alpha4_*(rot1_*rot1_) + alpha4_*(rot2_*rot2_);
-    // rot2Std_    = alpha1_*(rot2_*rot2_) + alpha2_*(trans_*trans_);
-
 
     rot1Std_    = 0.05;
     transStd_   = 0.005;
     rot2Std_    = 0.05;
 
-    // rot1Std_    = k1_*fabs(rot1_);
-    // transStd_   = k2_*fabs(trans_);
-    // rot2Std_    = k1_*fabs(rot2_);
-
-    // printf("rot1Std_: %f, transStd_: %f, rot2Std_: %f\n", rot1Std_, transStd_, rot2Std_);
-    // particle_t sample;
-    // sample.pose = odometry;
-    // sample.parent_pose = previousOdometry_;
-    // utime_ = odometry.utime;
-    // particle_t newSample = applyAction(sample);
 
     previousOdometry_ = odometry;
 
