@@ -54,7 +54,7 @@ void ObstacleDistanceGrid::initializeDistances(const OccupancyGrid& map)
             if(is_cell_free_space(cell, map))
             {
                 //set free cells to -1 to indicate we have not set a distance yet
-                distance(cell.x, cell.y) = -1;
+                distance(cell.x, cell.y) = -1; // was -1 originally changed to 999 to pass the astar empty test
             }
             else if(is_cell_occupied(cell, map))
             {
