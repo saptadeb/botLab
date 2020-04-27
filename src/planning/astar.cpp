@@ -110,7 +110,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                     usablePath.utime = start.utime;
                     usablePath.path.push_back(start);  
                     destinationFound = true;
-                    printf("Found Path \n");
+                    // printf("Found Path \n");
                     return makePath(ngbr, firstNode, initialtheta, usablePath, distances, closedList);
                 }
                 
@@ -245,7 +245,8 @@ robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usab
         Point<double> temp;
         temp.x = tempnode.cell.x;
         temp.y = tempnode.cell.y;
-        printf("PATH POINT -- x: %f, y: %f \n", temp.x, temp.y);
+        int ocost = tempnode.fCost - tempnode.gCost - tempnode.hCost;
+        printf("PATH POINT -- x: %f y: %f fcost: %d gcost: %d hcost: %d ocost: %d\n", temp.x, temp.y, tempnode.fCost, tempnode.gCost, tempnode.hCost, ocost);
 
         Point<double> temp2 = grid_position_to_global_position(temp, distances);
         pose_xyt_t nextPoint;

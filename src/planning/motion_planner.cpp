@@ -31,12 +31,13 @@ robot_path_t MotionPlanner::planPath(const pose_xyt_t& start,
         failedPath.utime = utime_now();
         failedPath.path_length = 1;
         failedPath.path.push_back(start);
-
-        std::cout << "INFO: path rejected due to invalid goal\n";        
+        // for (auto& point : failedPath.path) {
+        //     printf("\npoint x: %f y: %f ", point.x, point.y);
+        // }
+        std::cout << "\nINFO: path rejected due to invalid goal\n";        
 
         return failedPath;
     }
-    
     // Otherwise, use A* to find the path
     return search_for_path(start, goal, distances_, searchParams);
 }

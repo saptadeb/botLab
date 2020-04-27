@@ -243,8 +243,10 @@ bool test_saved_poses(const std::string& mapFile, const std::string& posesFile, 
         // The goal must be the same position as the end of the path if there was success
         if(!path.path.empty())
         {
+            auto startCell = global_position_to_grid_cell(Point<float>(start.x, start.y), grid);
             auto goalCell = global_position_to_grid_cell(Point<float>(goal.x, goal.y), grid);
             auto endCell = global_position_to_grid_cell(Point<float>(path.path.back().x, path.path.back().y), grid);
+            printf("startCell x: %d y: %d --- goalcell x: %d y: %d --- endcell x: %d y: %d\n", startCell.x, startCell.y, goalCell.x, goalCell.y, endCell.x, endCell.y); 
             foundPath &= goalCell == endCell;
         }
         
