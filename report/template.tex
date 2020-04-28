@@ -42,10 +42,6 @@ Write a paragraph or two description including the following:
     \item Comment on mapping behavior.
 \end{itemize}
 
-The mapping function is implemented in two stages - first we score the cells which are located at the endpoint of the rays. If the cells corresponding to the endpoint of the rays are in the given map, log odds for the cell are increased by `3', defining the boundaries. Next, the cells between the robot cell and the endpoint cell are scored. Bresenham's line algorithm is then used to rasterize the given ray. The log odds of these free cells are then decreased by `1'. 
-
-The maps generated when the robot is stationary as is in the case of convex\_grid\_10mx10m\_5cm.log are not quite accurate at far away points. As the robot is stationary the laser rays originating from that position diverge farther away from each other at long distances, because of which some of the cells in between those rays don't get scored. This problem is mitigated when the robot is in motion; wherein because of the motion of the robot the laser rays tend to cover most of the grid cells and hence we obtain a better map in the end.  
-
 \subsection*{1.2.1 - MCL - Action Model} 
 
  Write a paragraph or two description including the following:
@@ -59,8 +55,6 @@ The maps generated when the robot is stationary as is in the case of convex\_gri
 mbot to another?
         \end{itemize}
 \end{itemize}
-
-
 
 \begin{figure}[H]
 \centering
