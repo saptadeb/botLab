@@ -110,6 +110,8 @@ A simplified likelihood field model is implemented which overcomes the lack of s
     \item Did you have to change your mapping log odds to improve on performance? If so, report them.
 \end{itemize}
 
+
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/131.png}
@@ -138,12 +140,12 @@ A simplified likelihood field model is implemented which overcomes the lack of s
 
 \subsection*{2.1 - Obstacle Distances} 
 
-Comment on whether your code passed or failed the three tests in obstacle\_distance\_grid\_test. Provide remarks on the code’s performance and whether there is anything major slowing it down.
+The obstacle distances grid code passes all the three tests in obstacle\_distance\_grid\_test, namely test for unknown distances, test for obstacle distances and test for free space distances. The code is quite optimal and there isn't anything major which tends to slow it down. The code can be made more efficient by expanding a given node to all of it 8 neighboring cells, rather than expanding it just for 4 cells.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/21.png}
-\caption{Obstacle distance grip obtained at the end of Obstacle Slam with Full SLAM}
+\caption{Obstacle distance grid obtained at the end of Obstacle Slam with Full SLAM}
 \end{figure}
 
 

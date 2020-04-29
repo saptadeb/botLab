@@ -74,9 +74,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 {
     //Ensure map and obstacle distance grid are same dimensions
     resetGrid(map);
-
-    ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
-
+    
     initializeDistances(map);
 
     std::priority_queue<DistanceNode> searchQueue;
