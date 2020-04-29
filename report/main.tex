@@ -1,4 +1,4 @@
-\documentclass[journal,twocolumn]{IEEEtran}
+\documentclass[journal,onecolumn]{IEEEtran}
 
 % include a few useful packages; you will probably want more
 \usepackage{graphicx} 
@@ -60,24 +60,42 @@ mbot to another?
         \end{itemize}
 \end{itemize}
 
+Out of the two most widely used motion models, odometry motion model is used over the velocity motion model for this project. Odometry information is obtained by integrating the wheel encoder information over periodic time intervals. It is however observed that even though the odometry action model isn't perfect, it provides a better approximation of the robot motion than the velocity model for predicting the robot motion.
 
+In order to predict the robot pose the odometry information (i.e. x, y and $\theta$) is changed to an RTR information given by equation \ref{eq:RTR}, i.e rotation-translate-rotation which is sampled with a Gaussian noise distribution in the form described in equation \ref{eq:fullRTR}. In the initial phases of the project the values of the noise constants were chosen as $k_1 = 0.8$ and $k_2 = 0.3$. On further inspection and to reduce the computation load to calculate the standard deviation for each odometry information, the standard deviations are given as constants, where ${\sigma}^2_{rot1} = 0.05$, ${\sigma}^2_{trans} = 0.005$ and ${\sigma}^2_{rot2} = 0.05$. These noise constants are chosen and tuned in order to achieve a better spread of distribution of the particles and to achieve a more accurate proposal which is used for the sensor model. It is expected to see the tuning parameters differ from one mbot to another, but the difference should be small as the make and model of the mbot is consistent The elements which could factor into a possible drastic difference between the tuning parameters from one mbot to another could be the systematic errors related to the specific mbot.
+
+\begin{equation}\label{eq:RTR}
+\begin{split}
+	\delta_{rot1} &= atan2(y_t - y_{t-1}, x_t - x_{t-1}) - \theta_{t-1}	\\
+	\delta_{trans} &= \sqrt{(x_t - x_{t-1})^2 - 	(y_t - y_{t-1})^2}	\\
+	\delta_{rot2} &= \theta_t - \theta_{t-1} - \delta_{rot1}
+\end{split}
+\end{equation}
+
+\begin{equation}\label{eq:fullRTR}
+\begin{split}
+	\hat{\delta}_{rot1} & \sim \mathcal{N}(\delta_{rot1},\,k_1 \cdot \mid\delta_{rot1}\mid)	\\
+	\hat{\delta}_{trans} &\sim \mathcal{N}(\delta_{trans},\,k_2 \cdot \mid\delta_{trans}\mid)	\\
+	\hat{\delta}_{rot2} &\sim \mathcal{N}(\delta_{rot2},\,k_1 \cdot \mid\delta_{rot2}\mid)
+\end{split}
+\end{equation}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1211.png}
-\caption{Final png showing the particle distribution you obtained at the end of drive square with action only}
+\caption{Particle distribution obtained at the end of drive square with action only}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1212.png}
-\caption{Final png showing the particle distribution you obtained at the end of obstacle slam with action only}
+\caption{Particle distribution obtained at the end of obstacle slam with action only}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1213.png}
-\caption{Final png showing the particle distribution you obtained at the end of straight line calm with action only}
+\caption{Particle distribution obtained at the end of straight line calm with action only}
 \end{figure}
 
 \subsection*{1.2.2 - MCL - Sensor Model \& Particle Filter} 
@@ -94,20 +112,20 @@ mbot to another?
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1221.png}
-\caption{Final png showing the particle distribution you obtained at the end of drive square with localization only}
+\caption{Particle distribution obtained at the end of drive square with localization only}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1222.png}
-\caption{Final png showing the particle distribution you obtained at the end of obstacle slam with localization only}
+\caption{Particle distribution obtained at the end of obstacle slam with localization only}
 \end{figure}
 
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/1223.png}
-\caption{Final png showing the particle distribution you obtained at the end of straight line with localization only}
+\caption{Particle distribution obtained at the end of straight line with localization only}
 \end{figure}
 
 \subsection*{1.3 - Simultaneous Localization and Mapping (SLAM)} 
@@ -122,25 +140,25 @@ mbot to another?
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/131.png}
-\caption{Final png showing the particle distribution you obtained at the end of Obstacle Slam with Full SLAM}
+\caption{Particle distribution obtained at the end of Obstacle Slam with Full SLAM}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/template-robotics.jpg}
-\caption{Final png showing the particle distribution you obtained at the end of Maze LowRes with Full SLAM}
+\caption{Particle distribution obtained at the end of Maze LowRes with Full SLAM}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/template-robotics.jpg}
-\caption{Final png showing the particle distribution you obtained at the end of Maze HiRes with Full SLAM}
+\caption{Particle distribution obtained at the end of Maze HiRes with Full SLAM}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/template-robotics.jpg}
-\caption{Final png showing the particle distribution you obtained at the end of Maze Hard with Full SLAM}
+\caption{Particle distribution obtained at the end of Maze Hard with Full SLAM}
 \end{figure}
 
 \section{PATH PLANNING AND EXPLORATION}
@@ -152,7 +170,7 @@ Comment on whether your code passed or failed the three tests in obstacle\_dista
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/21.png}
-\caption{Final png showing the obstacle distance grip obtained at the end of Obstacle Slam}
+\caption{Obstacle distance grip obtained at the end of Obstacle Slam with Full SLAM}
 \end{figure}
 
 
@@ -163,7 +181,7 @@ Report statistics on your path planning execution times for each of the example 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.3\textwidth]{Media/template-robotics.jpg}
-\caption{Final png showing the path you obtained at the end of Maze HiRes with A* path planning}
+\caption{Path obtained at the end of Maze HiRes with A* path planning}
 \end{figure}
 
 \subsection*{2.3 - Map Exploration} 

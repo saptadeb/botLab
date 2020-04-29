@@ -7,8 +7,8 @@
 
 
 ActionModel::ActionModel(void)
-: k1_(0.01f)
-, k2_(0.03f)
+: k1_(0.8f)
+, k2_(0.3f)
 , alpha1_(0.6f) //0.1
 , alpha2_(0.07f) //0.0001
 , alpha3_(0.8f) //0.03
@@ -49,13 +49,18 @@ bool ActionModel::updateAction(const pose_xyt_t& odometry)
     trans_ *= dir;
     rot2_   = angle_diff(deltaTheta, rot1_);
     // if(fabs(trans_) < 0.0005f || fabs(rot2_) < 0.0001f){
-    if((fabs(trans_) + fabs(rot2_)) < 0.00001f){    //0.0001
+    if((fabs(trans_) + fabs(rot2_)) < 0.00001f){    //0.0001 -- tolerance can be changed for slow or fast motion
         moved_ = false;
     } else{
         moved_ = true;
     }
 
 
+    // rot1Std_    = k1_ * rot1_;
+    // transStd_   = k2_ * trans_;
+    // rot2Std_    = k1_ * rot2_; 
+
+    // hard coding decreases extra computation needed to calculate standard deviations
     rot1Std_    = 0.05;
     transStd_   = 0.005;
     rot2Std_    = 0.05;
