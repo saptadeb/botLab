@@ -1,4 +1,4 @@
-\documentclass[journal,onecolumn]{IEEEtran}
+\documentclass[journal,twocolumn]{IEEEtran}
 
 % include a few useful packages; you will probably want more
 \usepackage{graphicx} 
@@ -34,31 +34,11 @@
 
 \subsection*{1.1 - Mapping - Occupancy Grid} 
 
-Write a paragraph or two description including the following:
-
-\begin{itemize}
-    \item Provide the values of the incremental log odds you're using for a free \& occupied cells.
-    \item Describe the method used determine which cells to update.
-    \item Comment on mapping behavior.
-\end{itemize}
-
 The mapping function is implemented in two stages - first we score the cells which are located at the endpoint of the rays. If the cells corresponding to the endpoint of the rays are in the given map, log odds for the cell are increased by `3', defining the boundaries. Next, the cells between the robot cell and the endpoint cell are scored. Bresenham's line algorithm is then used to rasterize the given ray. The log odds of these free cells are then decreased by `1'. 
 
 The maps generated when the robot is stationary as is in the case of convex\_grid\_10mx10m\_5cm.log are not quite accurate at far away points. As the robot is stationary the laser rays originating from that position diverge farther away from each other at long distances, because of which some of the cells in between those rays don't get scored. This problem is mitigated when the robot is in motion; wherein because of the motion of the robot the laser rays tend to cover most of the grid cells and hence we obtain a better map in the end.  
 
 \subsection*{1.2.1 - MCL - Action Model} 
-
- Write a paragraph or two description including the following:
- \begin{itemize}
-    \item Specify what type of action model you're using.
-    \item Provide all noise constants that you're using.
-    \item Comment on the your action model:
-        \begin{itemize}
-            \item Does the distribution grow as expected for the particles?
-            \item Do you think the action model constants will differ drastically from one
-mbot to another?
-        \end{itemize}
-\end{itemize}
 
 Out of the two most widely used motion models, odometry motion model is used over the velocity motion model for this project. Odometry information is obtained by integrating the wheel encoder information over periodic time intervals. It is however observed that even though the odometry action model isn't perfect, it provides a better approximation of the robot motion than the velocity model for predicting the robot motion.
 
@@ -100,14 +80,7 @@ In order to predict the robot pose the odometry information (i.e. x, y and $\the
 
 \subsection*{1.2.2 - MCL - Sensor Model \& Particle Filter} 
 
- Write a paragraph or two description including the following:
- \begin{itemize}
-    \item Specify what type of sensor model you're using, and how you are weighting and resampling.
-    \item Provide all noise constants that you're using.
-    \item Is the estimated pose closer to the true pose with your localized pose estimate compared to that from odometry?
-    \item Do the particles remain in a tight region as the robot moves?
-    \item Do the particles spread more aggressively with a certain motion type? (rotation, for example).
-\end{itemize}
+A simplified likelihood field model is implemented which overcomes the lack of smoothness and computational limitations of the sensor beam model. The sensor model function provides a score for a given ray, by inspecting the endpoints of the ray. If the endpoints of the ray are occupied, i.e. the endpoint of the ray is an obstacle, the log odds of that cell is returned. But in case the endpoint is not an obstacle, the ray is extrapolated in the forward and backward direction by one cell and a fraction (0.5) of their log odds is added to the score. These ray scores are then used as weights for a given particle. Since, the sensor model acts as a correction step, the pose estimate is almost similar to the true pose. It is observed that the sensor model performs well and the particles tend to remain in a tight region as the robot moves. The particles though have a tendency to spread if the robot rotates aggressively, but the come closer as the robot starts to move again.
 
 \begin{figure}[H]
 \centering

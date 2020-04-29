@@ -30,9 +30,7 @@ void ParticleFilter::initializeFilterAtPose(const pose_xyt_t& pose)
         p.parent_pose = p.pose;
         p.weight = sampleWeight;
     }
-
     posterior_.back().pose = pose;
-
 }
 
 
@@ -49,27 +47,20 @@ pose_xyt_t ParticleFilter::updateFilter(const pose_xyt_t&      odometry,
         posterior_ = computeNormalizedPosterior(proposal, laser, map);
         posteriorPose_ = estimatePosteriorPose(posterior_);
     }
-
     posteriorPose_.utime = odometry.utime;
-
     return posteriorPose_;
-    // return posterior_;
-
 }
 
 pose_xyt_t ParticleFilter::updateFilterActionOnly(const pose_xyt_t& odometry)
 {
     bool hasRobotMoved = actionModel_.updateAction(odometry);
-
     if(hasRobotMoved)
     {
         // auto prior = resamplePosteriorDistribution();
         auto proposal = computeProposalDistribution(posterior_);
         posterior_ = proposal;
     }
-
     posteriorPose_ = odometry;
-
     return posteriorPose_;
 }
 
@@ -95,12 +86,12 @@ std::vector<particle_t> ParticleFilter::resamplePosteriorDistribution(void)
     std::vector<particle_t> prior;
 
     int i = 0;
-    double M_inv = 1.0 / kNumParticles_; //float
+    double M_inv = 1.0 / kNumParticles_; 
     double c,r;
 
     r = (((double) rand()) / (double) RAND_MAX) * M_inv;
     c = posterior_[0].weight;
-    for (int m = 0; m < kNumParticles_; m++){  // start from m=0 and i=0
+    for (int m = 0; m < kNumParticles_; m++){ 
         double U = r + m * M_inv;
         while (U > c) {
             i++;
@@ -115,11 +106,9 @@ std::vector<particle_t> ParticleFilter::resamplePosteriorDistribution(void)
 std::vector<particle_t> ParticleFilter::computeProposalDistribution(const std::vector<particle_t>& prior)
 {
     std::vector<particle_t> proposal;
-
     for (auto& p : prior){
         proposal.push_back(actionModel_.applyAction(p));
     }
-
     return proposal;
 }
 
@@ -147,6 +136,7 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     for(auto& p : posterior){
         p.weight /= wSum;
     }
+
     return posterior;
 }
 
@@ -164,6 +154,7 @@ pose_xyt_t ParticleFilter::estimatePosteriorPose(const std::vector<particle_t>& 
         weightedCos += p.weight * std::cos(p.pose.theta);
     }
     pose.theta = std::atan2(weightedSin, weightedCos);
+    
     if((pose.x < 10000 && pose.y < 10000))
         return pose;
 }
