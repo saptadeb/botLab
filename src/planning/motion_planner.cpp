@@ -77,7 +77,10 @@ bool MotionPlanner::isPathSafe(const robot_path_t& path) const
 {
 
     ///////////// TODO: Implement your test for a safe path here //////////////////
-
+    if(path.path_length < 2)
+    {
+        return false;
+    }
     return true;
 }
 

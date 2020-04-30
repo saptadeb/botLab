@@ -93,8 +93,10 @@ void Exploration::handlePose(const lcm::ReceiveBuffer* rbuf, const std::string& 
 void Exploration::handleConfirmation(const lcm::ReceiveBuffer* rbuf, const std::string& channel, const message_received_t* confirm)
 {
     std::lock_guard<std::mutex> autoLock(dataLock_);
-    if(confirm->channel == CONTROLLER_PATH_CHANNEL && confirm->creation_time == most_recent_path_time) pathReceived_ = true;
-}
+    std::cout<<"I got a message confirmation! \n";
+    //if(confirm->channel == CONTROLLER_PATH_CHANNEL && confirm->creation_time == most_recent_path_time) pathReceived_ = true;
+    //if(confirm->channel == CONTROLLER_PATH_CHANNEL) pathReceived_ = true;
+    pathReceived_ = true;}
 
 bool Exploration::isReadyToUpdate(void)
 {
@@ -222,6 +224,45 @@ int8_t Exploration::executeInitializing(void)
     status.status = exploration_status_t::STATUS_COMPLETE;
     
     lcmInstance_->publish(EXPLORATION_STATUS_CHANNEL, &status);
+
+    // code added
+    hasReturnHomePath_ = false;
+   
+    pose_xyt_t p;
+    for (int i =0; i < 4; i++) {
+        p.theta = currentPose_.theta;
+        p.x = 0;
+        p.y = 0;
+        currentPath_.path.push_back(p);
+        for (int j = 0; j < 11; j++) {
+            p.x = .1*j;
+            p.y = 0;
+            currentPath_.path.push_back(p);
+        }
+        for (int j = 0; j < 11; j++) {
+            p.x = 1;
+            p.y = .1*j;
+            currentPath_.path.push_back(p);
+        }
+        for (int j = 0; j < 11; j++) {
+            p.x = 1-.1*j;
+            p.y = 1;
+            currentPath_.path.push_back(p);
+        }
+        for (int j = 0; j < 11; j++) {
+            p.x = 0;
+            p.y = 1-.1*j;
+            currentPath_.path.push_back(p);
+        }
+    }
+    p.x = 0;
+    p.y = -.05;
+    for (int i = 0; i < 5; i++){
+        currentPath_.path.push_back(p);
+    }
+
+    currentPath_.path_length = currentPath_.path.size();
+    //end of code added
     
     return exploration_status_t::STATE_EXPLORING_MAP;
 }
@@ -243,6 +284,14 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *           explored more of the map.
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
+
+    // updating frontiers
+    lcmInstance_->handleTimeout(50);  // update at 20Hz minimum
+    copyDataForUpdate();
+
+    planner_.setMap(currentMap_);
+    frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+
     
     /////////////////////////////// End student code ///////////////////////////////
     
@@ -302,7 +351,15 @@ int8_t Exploration::executeReturningHome(bool initialize)
     *       (2) currentPath_.path_length > 1  :  currently following a path to the home pose
     */
     
+    
+    planner_.setMap(currentMap_);
 
+    if (!hasReturnHomePath_) {
+        currentPath_ = planner_.planPath(currentPose_, homePose_);
+        if (planner_.isPathSafe(currentPath_)) {
+            hasReturnHomePath_ = true;
+        }
+    }
 
     /////////////////////////////// End student code ///////////////////////////////
     
