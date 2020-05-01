@@ -246,7 +246,7 @@ bool test_saved_poses(const std::string& mapFile, const std::string& posesFile, 
             auto startCell = global_position_to_grid_cell(Point<float>(start.x, start.y), grid);
             auto goalCell = global_position_to_grid_cell(Point<float>(goal.x, goal.y), grid);
             auto endCell = global_position_to_grid_cell(Point<float>(path.path.back().x, path.path.back().y), grid);
-            printf("startCell x: %d y: %d --- goalcell x: %d y: %d --- endcell x: %d y: %d\n", startCell.x, startCell.y, goalCell.x, goalCell.y, endCell.x, endCell.y); 
+            // printf("startCell x: %d y: %d --- goalcell x: %d y: %d --- endcell x: %d y: %d\n", startCell.x, startCell.y, goalCell.x, goalCell.y, endCell.x, endCell.y); 
             foundPath &= goalCell == endCell;
         }
         
@@ -416,11 +416,11 @@ void print_timing_info(timing_info_t& info)
         TimingAcc acc;
         std::for_each(times.second.begin(), times.second.end(), std::ref(acc));
         
-        // std::cout << times.first << " :: (us)\n"
-        //     << "\tMin :    " << min(acc) << '\n'
-        //     << "\tMean:    " << mean(acc) << '\n'
-        //     << "\tMax:     " << max(acc) << '\n'
-        //     << "\tMedian:  " << median(acc) << '\n'
-        //     << "\tStd dev: " << std::sqrt(variance(acc)) << '\n'; 
+        std::cout << times.first << " :: (us)\n"
+            // << "\tMin :    " << min(acc) << '\n'
+            << "\tMean:    " << mean(acc) << '\n'
+            // << "\tMax:     " << max(acc) << '\n'
+            << "\tMedian:  " << median(acc) << '\n'
+            << "\tStd dev: " << std::sqrt(variance(acc)) << '\n'; 
     }
 }

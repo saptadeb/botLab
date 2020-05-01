@@ -81,7 +81,10 @@ std::vector<frontier_t> find_map_frontiers(const OccupancyGrid& map,
             }
         }
     }
-    
+    // printf("FRONTIER POINTS:\n");
+    // for (auto& element : frontiers) {
+    //     printf("cell: %f\n", element.cells);
+    // }
     return frontiers;
 }
 
@@ -138,7 +141,9 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
         }
     }
 
+
     closest_point = closest_frontier.cells[int((closest_frontier.cells.size()-1)/2)];
+    printf("closest point: %d, %d\n", closest_point.x, closest_point.y);
 
 
     // Search around the closest frontier until you find the closest point that you can get to

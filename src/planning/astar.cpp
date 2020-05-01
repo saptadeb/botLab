@@ -5,7 +5,6 @@
 #include <queue>
 #include <vector>
 #include <stack>
-using namespace std;
 
 robot_path_t search_for_path(pose_xyt_t start, 
                              pose_xyt_t goal, 
@@ -14,8 +13,8 @@ robot_path_t search_for_path(pose_xyt_t start,
 {  
     printf("\nin global Start x: %f, y: %f --- Goal x: %f,y: %f\n",start.x,start.y,goal.x,goal.y);
     // initializing open and closed list
-    priority_queue<Node, vector<Node>, greater<Node>> openList;
-    vector<Node> closedList;
+    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> openList;
+    std::vector<Node> closedList;
 
     robot_path_t path;
     path.utime = start.utime;
@@ -182,7 +181,7 @@ int get_hCost(Point<double> goal, cell_t current){
 int get_oCost(cell_t cell, const SearchParams& params, const ObstacleDistanceGrid& distances){
     int obstacleCost = 0;
     if (distances(cell.x, cell.y) > params.minDistanceToObstacle && distances(cell.x, cell.y) < params.maxDistanceWithCost)
-        obstacleCost = static_cast<int>(pow(params.maxDistanceWithCost - distances(cell.x, cell.y)*200, params.distanceCostExponent));
+        obstacleCost = static_cast<int>(pow(params.maxDistanceWithCost - distances(cell.x, cell.y)*1000, params.distanceCostExponent));
     return obstacleCost;
 }
 
@@ -234,7 +233,7 @@ vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid){
 }
 
 robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usablePath, const ObstacleDistanceGrid& distances, vector<Node> CL){
-    printf("-------MAKE PATH------");
+    // printf("-------MAKE PATH------");
     stack<pose_xyt_t> initPath;
     int c = 0;
     float prevX, prevY;
@@ -246,7 +245,7 @@ robot_path_t makePath(Node goal, Node start, double initTheta, robot_path_t usab
         temp.x = tempnode.cell.x;
         temp.y = tempnode.cell.y;
         int ocost = tempnode.fCost - tempnode.gCost - tempnode.hCost;
-        printf("PATH POINT -- x: %f y: %f fcost: %d gcost: %d hcost: %d ocost: %d\n", temp.x, temp.y, tempnode.fCost, tempnode.gCost, tempnode.hCost, ocost);
+        // printf("PATH POINT -- x: %f y: %f fcost: %d gcost: %d hcost: %d ocost: %d\n", temp.x, temp.y, tempnode.fCost, tempnode.gCost, tempnode.hCost, ocost);
 
         Point<double> temp2 = grid_position_to_global_position(temp, distances);
         pose_xyt_t nextPoint;

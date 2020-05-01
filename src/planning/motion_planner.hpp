@@ -5,6 +5,7 @@
 #include <lcmtypes/pose_xyt_t.hpp>
 #include <planning/astar.hpp>
 #include <planning/obstacle_distance_grid.hpp>
+#include <planning/frontiers.hpp>
 
 //for visualization
 #include <vector>
@@ -146,6 +147,13 @@ public:
     * \return   ObstacleDistanceGrid currently being used by the motion planner.
     */
     ObstacleDistanceGrid obstacleDistances(void) const { return distances_; }
+
+    // A new function for planning a path to free space near a given frontier point
+    robot_path_t planPathToFrontier(std::vector<frontier_t> frontier, pose_xyt_t& start, pose_xyt_t& goal);
+
+    // A new function for planning a path back home
+    robot_path_t planPathBackHome(pose_xyt_t& start, pose_xyt_t& goal);
+
 
 private:
     

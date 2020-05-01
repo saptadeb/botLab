@@ -29,6 +29,7 @@ Exploration::Exploration(int32_t teamNumber,
 , haveHomePose_(false)
 , lcmInstance_(lcmInstance)
 , pathReceived_(false)
+, hasReturnHomePath_(false)
 {
     assert(lcmInstance_);   // confirm a nullptr wasn't passed in
     
@@ -186,7 +187,7 @@ void Exploration::executeStateMachine(void)
         std::cout << "timestamp: " << currentPath_.utime << "\n";
 
         for(auto pose : currentPath_.path){
-            std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
+            // std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
         }std::cout << "\n";
 
         lcmInstance_->publish(CONTROLLER_PATH_CHANNEL, &currentPath_);
@@ -200,9 +201,9 @@ void Exploration::executeStateMachine(void)
 
         std::cout << "path timestamp: " << currentPath_.utime << "\npath: ";
 
-        for(auto pose : currentPath_.path){
-            std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
-        }std::cout << "\n";
+        // for(auto pose : currentPath_.path){
+        //     std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
+        // }std::cout << "\n";
 
         lcmInstance_->publish(CONTROLLER_PATH_CHANNEL, &currentPath_);
 
@@ -285,13 +286,29 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
 
-    // updating frontiers
-    lcmInstance_->handleTimeout(50);  // update at 20Hz minimum
-    copyDataForUpdate();
-
+    // update distance map frontier
     planner_.setMap(currentMap_);
-    frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+    frontiers_ = find_map_frontiers(currentMap_,currentPose_);
 
+    // std::cout << "Number of frontiers: " << frontiers_.size() << std::endl;
+    
+    if(!frontiers_.empty()){
+        prev_frontier_size = frontiers_.size();
+        std::cout << "frontier not empty" << std::endl;
+
+        // // choose an arbitrary frontier point to start from
+        // frontier_t rand_frontier = frontiers_[rand()%(frontiers_.size())];
+        // Point<float> rand_point = rand_frontier.cells[rand()%(rand_frontier.cells.size())];
+        // std::cout << "frontier point: " << rand_point.x << " , " << rand_point.y << std::endl;
+
+        // plan the path to frontier
+        if(sqrt((currentPose_.x-currentTarget_.x)*(currentPose_.x-currentTarget_.x) + (currentPose_.y-currentTarget_.y)*(currentPose_.y-currentTarget_.y)) < 0.3){
+            currentPath_ = planner_.planPathToFrontier(frontiers_,currentPose_,currentTarget_);
+        }
+        
+    }
+
+    //
     
     /////////////////////////////// End student code ///////////////////////////////
     
