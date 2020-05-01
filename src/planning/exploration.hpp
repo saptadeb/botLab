@@ -96,16 +96,17 @@ private:
     bool haveNewMap_;                   // Flag indicating if a new map has been received since the last call to copyDataForUpdate
     bool haveHomePose_;                 // Flag indicating if the home pose has been set
     
+    bool returnHome = false;    
+
     lcm::LCM* lcmInstance_;             // Instance of LCM to use for sending out information
     std::mutex dataLock_;               // Lock to keep the LCM and explore threads properly synchronized
     
     /////////// TODO: Add any state variables you might need here //////////////
     
-    bool hasReturnHomePath_;
     pose_xyt_t   currentTarget_;    // Current target robot is driving to
     OccupancyGrid exploredMap_;     // Map found after completing the RETURNING_HOME state
     
-    size_t prev_frontier_size;
+    size_t prev_frontier_size = 0;
     bool pathReceived_;
     int64_t most_recent_path_time;
 //    int8_t path_redundancy_count;

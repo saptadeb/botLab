@@ -369,13 +369,9 @@ int8_t Exploration::executeReturningHome(bool initialize)
     */
     
     
-    planner_.setMap(currentMap_);
-
-    if (!hasReturnHomePath_) {
-        currentPath_ = planner_.planPath(currentPose_, homePose_);
-        if (planner_.isPathSafe(currentPath_)) {
-            hasReturnHomePath_ = true;
-        }
+    while(!returnHome){
+        currentPath_ = planner_.planPathBackHome(currentPose_,homePose_);
+        returnHome = true;
     }
 
     /////////////////////////////// End student code ///////////////////////////////

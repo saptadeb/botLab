@@ -89,23 +89,6 @@ std::vector<frontier_t> find_map_frontiers(const OccupancyGrid& map,
 }
 
 
-//extra function added to check the validity of the goal and the path
-bool check_valid(const MotionPlanner& planner, float x, float y, pose_xyt_t curr_pose) {
-    pose_xyt_t pose;
-    pose.x = x;
-    pose.y = y;
-
-    if (planner.isValidGoal(pose)) {
-        robot_path_t temp_path = planner.planPath(curr_pose, pose);
-        if(temp_path.path_length <3) 
-            return false;
-        else
-            return planner.isPathSafe(temp_path);
-    } else {
-        return false;
-    }
-}
-
 robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers, 
                                    const pose_xyt_t& robotPose,
                                    const OccupancyGrid& map,
@@ -121,103 +104,8 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     */
     robot_path_t emptyPath;
 
-    // if no frontiers, return empty path
-    if (frontiers.size() == 0) return emptyPath;
-    
-    float min_dist = 99999999999999;
-    frontier_t closest_frontier;
-    Point<float> closest_point;
+    return emptyPath;
 
-    // step 1: figure out which of the frontiers to drive to
-    // use shortest euclidian distance frontier, effectively making breadth first search
-    for (auto frontier : frontiers) {
-        for (auto point : frontier.cells) {
-            float distance_sq = (robotPose.x - point.x)*(robotPose.x - point.x) + (robotPose.y - point.y)*(robotPose.y - point.y) ;// euclidian distance
-            if (distance_sq < min_dist) {
-                closest_frontier = frontier;
-                closest_point = point;
-                min_dist = distance_sq;
-            }
-        }
-    }
-
-
-    closest_point = closest_frontier.cells[int((closest_frontier.cells.size()-1)/2)];
-    printf("closest point: %d, %d\n", closest_point.x, closest_point.y);
-
-
-    // Search around the closest frontier until you find the closest point that you can get to
-    bool foundPose = false;
-    float square_radius = .025; // .05
-    float sq_len = .025; // .05;
-    pose_xyt_t goal_pose;
-    while (!foundPose) {
-        std::cout << "Looking for free spot to find path to!\n";
-        // find the white point        //check top and bottom
-        float top_height = closest_point.y + square_radius;
-        float bot_height = closest_point.y - square_radius;
-        for (float i = -square_radius; i <= square_radius; i+=sq_len ) {
-            bool valid_point_top = check_valid(planner, closest_point.x + i, top_height, robotPose); // absolute x, absolute y
-            bool valid_point_bot = check_valid(planner, closest_point.x + i, bot_height, robotPose);
-            /*
-            Point<double> check_top;
-            check_top.x = closest_point.x + i;
-            check_top.y = top_height;
-            printf("Check top X: %d, Y: %d\n", global_position_to_grid_cell(check_top, map).x, global_position_to_grid_cell(check_top, map).y);
-            Point<double> check_bot;
-            check_bot.x = closest_point.x + i;
-            check_bot.y = bot_height;
-            printf("Check bot X: %d, Y: %d\n", global_position_to_grid_cell(check_bot, map).x, global_position_to_grid_cell(check_bot, map).y);
-            */
-            if (valid_point_top) {
-                foundPose = true;
-                goal_pose.x = closest_point.x + i;
-                goal_pose.y = top_height;
-            } else if (valid_point_bot) {
-                foundPose = true;
-                goal_pose.x = closest_point.x + i;
-                goal_pose.y = bot_height;
-            }
-        }        // check left and right
-        float left_bound = closest_point.y + square_radius;
-        float right_bound = closest_point.y - square_radius;
-        for (float i = -square_radius; i <= square_radius; i+=sq_len ) {
-            bool valid_point_right = check_valid(planner, right_bound, closest_point.y + i, robotPose);
-            bool valid_point_left  = check_valid(planner, left_bound, closest_point.y + i, robotPose);
-            /*
-            Point<double> check_left;
-            check_left.x = left_bound;
-            check_left.y = closest_point.y + i;
-            printf("Check left X: %d, Y: %d\n", global_position_to_grid_cell(check_left, map).x, global_position_to_grid_cell(check_left, map).y);
-            Point<double> check_right;
-            check_right.x = right_bound;
-            check_right.y = closest_point.y + i;
-            printf("Check right X: %d, Y: %d\n", global_position_to_grid_cell(check_right, map).x, global_position_to_grid_cell(check_right, map).y);
-            */
-            if (valid_point_right) {
-                foundPose = true;
-                goal_pose.x = right_bound;
-                goal_pose.y = closest_point.y + i;
-            } else if (valid_point_left) {
-                foundPose = true;
-                goal_pose.x = left_bound;
-                goal_pose.y = closest_point.y + i;
-            }
-        }        
-        if (square_radius < 0.5)    
-            square_radius += sq_len;
-        else 
-            square_radius = 0.05;
-    }    /*
-    pose_xyt_t goal_pose;
-    goal_pose.x = closest_point.x;
-    goal_pose.y = closest_point.y;
-    */
-
-
-   // Plan a path to that point that is closest to the frontier and you can get to
-    goal_pose.theta = robotPose.theta;    // step 2: call motion planner to get a path to that frontier with astar
-    return planner.planPath(robotPose, goal_pose);
 }
 
 
