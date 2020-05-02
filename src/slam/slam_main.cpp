@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     getopt_t *gopt = getopt_create();
     getopt_add_bool(gopt, 'h', "help", 0, "Show this help"); 
     getopt_add_int(gopt, '\0', kNumParticlesArg, "200", "Number of particles to use in the particle filter");
-    getopt_add_int(gopt, '\0', kHitOddsArg, "3", "Amount to increase log-odds when a cell is hit by a laser ray");
+    getopt_add_int(gopt, '\0', kHitOddsArg, "4", "Amount to increase log-odds when a cell is hit by a laser ray"); // 3 to 6
     getopt_add_int(gopt, '\0', kMissOddsArg, "1", "Amount to decrease log-odds when a cell is passed through by a laser ray");
     getopt_add_bool(gopt, '\0', kUseOptitrackArg, 0, "Flag indicating if the map reference frame should be set to the Optitrack reference frame.");
     getopt_add_bool(gopt, '\0', kMappingOnlyArg, 0, "Flag indicating if mapping-only mode should be run");

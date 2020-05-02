@@ -38,6 +38,24 @@ The mapping function is implemented in two stages. First we score the cells whic
 
 The maps generated when the robot is stationary as is in the case of convex\_grid\_10mx10m\_5cm.log are not quite accurate at far away points. When the robot is stationary the laser rays originating from that position diverge farther away from each other at long distances, because of which some of the cells in between those rays don't get scored. This problem is mitigated when the robot is in motion; wherein because of the motion of the robot the laser rays tend to cover most of the grid cells and hence we obtain a better map in the end.  
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{Media/111.png}
+\caption{Robot Pose obtained at the end of convex offcenter with mapping only}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{Media/112.png}
+\caption{Robot Pose obtained at the end of drive square with mapping only}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{Media/113.png}
+\caption{Robot Pose obtained at the end of Maze LowRes with mapping only}
+\end{figure}
+
 \subsection*{1.2.1 - MCL - Action Model} 
 
 Out of the two most widely used motion models, odometry motion model is used over the velocity motion model for this project. Odometry information is obtained by integrating the wheel encoder information over periodic time intervals. It is however observed that even though the odometry action model isn't perfect, it provides a better approximation of the robot motion than the velocity model for predicting the robot motion.
@@ -161,14 +179,7 @@ In this project A* path planning algorithm is used in conjunction with the SLAM 
 
 \subsection*{2.3 - Map Exploration} 
 
-Comment on your exploration performance:
- \begin{itemize}
-    \item What are the factors that are preventing your exploration from being ideal?
-    \item Provide your logic behind tackling frontiers (how do you go about chosing your next frontier to go to)
-    \item Comments on the performance of Astar and path planning with automated exploration commands.
-\end{itemize}
-
-
+The only hinderance in the exploration function from being ideal is the fact that the A* code is not optimal and has a high computation time if the path to be planned is long, which can be confirmed form the log submitted with this report. The frontier closest to the robot pose is tackled first, which in turn reduces the distance that the robot has to plan a path for. A* path planning seems to work pretty well in short distance, but has a high computation time when implemented for distances farther away from the robot's current pose. 
 
 
 

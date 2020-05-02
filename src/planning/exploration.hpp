@@ -96,7 +96,7 @@ private:
     bool haveNewMap_;                   // Flag indicating if a new map has been received since the last call to copyDataForUpdate
     bool haveHomePose_;                 // Flag indicating if the home pose has been set
     
-    bool returnHome = false;    
+    bool hasReturnHomePath_ = false;    
 
     lcm::LCM* lcmInstance_;             // Instance of LCM to use for sending out information
     std::mutex dataLock_;               // Lock to keep the LCM and explore threads properly synchronized

@@ -55,4 +55,6 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
                                    const OccupancyGrid& map,
                                    const MotionPlanner& planner);
 
+bool check_valid(const MotionPlanner& planner, float x, float y, pose_xyt_t curr_pose);
+
 #endif // PLANNING_FRONTIERS_HPP

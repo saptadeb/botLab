@@ -181,7 +181,7 @@ int get_hCost(Point<double> goal, cell_t current){
 int get_oCost(cell_t cell, const SearchParams& params, const ObstacleDistanceGrid& distances){
     int obstacleCost = 0;
     if (distances(cell.x, cell.y) > params.minDistanceToObstacle && distances(cell.x, cell.y) < params.maxDistanceWithCost)
-        obstacleCost = static_cast<int>(pow(params.maxDistanceWithCost - distances(cell.x, cell.y)*1000, params.distanceCostExponent));
+        obstacleCost = static_cast<int>(pow(params.maxDistanceWithCost - distances(cell.x, cell.y)*2000, params.distanceCostExponent));
     return obstacleCost;
 }
 
@@ -217,7 +217,7 @@ vector<Node> expand_node(Node currentNode, const ObstacleDistanceGrid& grid){
     
     vector<Node> kids;
     
-    for(int n = 0; n < 8; ++n)          //CHANGE TO 8 TO INCLUDE DIAGONALS AS WELL
+    for(int n = 0; n < 4; ++n)          //CHANGE TO 8 TO INCLUDE DIAGONALS AS WELL
     {
         cell_t adjacentCell(currentNode.cell.x + xDeltas[n], currentNode.cell.y + yDeltas[n]);
 

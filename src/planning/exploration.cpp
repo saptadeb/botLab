@@ -29,7 +29,6 @@ Exploration::Exploration(int32_t teamNumber,
 , haveHomePose_(false)
 , lcmInstance_(lcmInstance)
 , pathReceived_(false)
-, hasReturnHomePath_(false)
 {
     assert(lcmInstance_);   // confirm a nullptr wasn't passed in
     
@@ -48,7 +47,7 @@ Exploration::Exploration(int32_t teamNumber,
     lcmInstance_->publish(EXPLORATION_STATUS_CHANNEL, &status);
     
     MotionPlannerParams params;
-    params.robotRadius = 0.2;
+    params.robotRadius = 0.2; //IS ACTUALLY .15, WE CHANGED TO .1
     planner_.setParams(params);
 }
 
@@ -97,7 +96,8 @@ void Exploration::handleConfirmation(const lcm::ReceiveBuffer* rbuf, const std::
     std::cout<<"I got a message confirmation! \n";
     //if(confirm->channel == CONTROLLER_PATH_CHANNEL && confirm->creation_time == most_recent_path_time) pathReceived_ = true;
     //if(confirm->channel == CONTROLLER_PATH_CHANNEL) pathReceived_ = true;
-    pathReceived_ = true;}
+    pathReceived_ = true;
+}
 
 bool Exploration::isReadyToUpdate(void)
 {
@@ -186,9 +186,9 @@ void Exploration::executeStateMachine(void)
 
         std::cout << "timestamp: " << currentPath_.utime << "\n";
 
-        for(auto pose : currentPath_.path){
-            // std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
-        }std::cout << "\n";
+        // for(auto pose : currentPath_.path){
+        //     std::cout << "(" << pose.x << "," << pose.y << "," << pose.theta << "); ";
+        // }std::cout << "\n";
 
         lcmInstance_->publish(CONTROLLER_PATH_CHANNEL, &currentPath_);
     }
@@ -226,8 +226,13 @@ int8_t Exploration::executeInitializing(void)
     
     lcmInstance_->publish(EXPLORATION_STATUS_CHANNEL, &status);
 
-    // code added
     hasReturnHomePath_ = false;
+
+    /* we added this
+    currentPath_.path[0] = currentPose_;
+    currentPath_.path_length = 1;
+    */
+
    
     pose_xyt_t p;
     for (int i =0; i < 4; i++) {
@@ -263,8 +268,8 @@ int8_t Exploration::executeInitializing(void)
     }
 
     currentPath_.path_length = currentPath_.path.size();
-    //end of code added
     
+
     return exploration_status_t::STATE_EXPLORING_MAP;
 }
 
@@ -286,30 +291,36 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
 
-    // update distance map frontier
+    // Update frontiers
+
+    lcmInstance_->handleTimeout(50);  // update at 20Hz minimum
+    copyDataForUpdate();
+
+    printf("EXPLORE\n");
     planner_.setMap(currentMap_);
-    frontiers_ = find_map_frontiers(currentMap_,currentPose_);
+    frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+    planner_.setNumFrontiers(frontiers_.size());
+    float distThreshold = 0.5; //45
+    float currDist;
 
-    // std::cout << "Number of frontiers: " << frontiers_.size() << std::endl;
-    
-    if(!frontiers_.empty()){
-        prev_frontier_size = frontiers_.size();
-        std::cout << "frontier not empty" << std::endl;
 
-        // // choose an arbitrary frontier point to start from
-        // frontier_t rand_frontier = frontiers_[rand()%(frontiers_.size())];
-        // Point<float> rand_point = rand_frontier.cells[rand()%(rand_frontier.cells.size())];
-        // std::cout << "frontier point: " << rand_point.x << " , " << rand_point.y << std::endl;
-
-        // plan the path to frontier
-        if(sqrt((currentPose_.x-currentTarget_.x)*(currentPose_.x-currentTarget_.x) + (currentPose_.y-currentTarget_.y)*(currentPose_.y-currentTarget_.y)) < 0.3){
-            currentPath_ = planner_.planPathToFrontier(frontiers_,currentPose_,currentTarget_);
-        }
-        
+    if (currentTarget_.x != 0 || currentTarget_.y != 0){
+        currDist = sqrt(pow(currentPose_.x - currentTarget_.x, 2) + pow(currentPose_.y - currentTarget_.y, 2));   
+    } else{
+        currDist = 0;
     }
-
-    //
     
+    
+
+    std::cout<<"dist: "<<currDist<<std::endl;
+    if ((currDist <= distThreshold && !frontiers_.empty())) {
+        currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+        if (currentPath_.path_length > 1) {
+            currentTarget_ = currentPath_.path[currentPath_.path_length - 1];
+        } 
+    }
+    
+
     /////////////////////////////// End student code ///////////////////////////////
     
     /////////////////////////   Create the status message    //////////////////////////
@@ -331,7 +342,7 @@ int8_t Exploration::executeExploringMap(bool initialize)
     // Otherwise, there are frontiers, but no valid path exists, so exploration has failed
     else
     {
-        status.status = exploration_status_t::STATUS_FAILED;
+        //status.status = exploration_status_t::STATUS_FAILED;
     }
     
     lcmInstance_->publish(EXPLORATION_STATUS_CHANNEL, &status);
@@ -368,14 +379,18 @@ int8_t Exploration::executeReturningHome(bool initialize)
     *       (2) currentPath_.path_length > 1  :  currently following a path to the home pose
     */
     
-    
-    while(!returnHome){
-        currentPath_ = planner_.planPathBackHome(currentPose_,homePose_);
-        returnHome = true;
+   planner_.setMap(currentMap_);
+
+    if (!hasReturnHomePath_) {
+        currentPath_ = planner_.planPath(currentPose_, homePose_);
+        if (planner_.isPathSafe(currentPath_)) {
+            hasReturnHomePath_ = true;
+        }
     }
 
     /////////////////////////////// End student code ///////////////////////////////
     
+
     /////////////////////////   Create the status message    //////////////////////////
     exploration_status_t status;
     status.utime = utime_now();
@@ -397,7 +412,7 @@ int8_t Exploration::executeReturningHome(bool initialize)
     // Else, there's no valid path to follow and we aren't home, so we have failed.
     else
     {
-        status.status = exploration_status_t::STATUS_FAILED;
+        //status.status = exploration_status_t::STATUS_FAILED;
     }
     
     lcmInstance_->publish(EXPLORATION_STATUS_CHANNEL, &status);
@@ -441,3 +456,21 @@ int8_t Exploration::executeFailed(bool initialize)
     
     return exploration_status_t::STATE_FAILED_EXPLORATION;
 }
+
+/*
+bool Exploration::isValid(int x, int y) 
+{ //If our Node is an obstacle it is not valid
+	//printf("%d,%d: %f, %f\n", x,y,distances.operator()(x,y), minDist);
+
+	if (planner_.obstacleDistances().operator()(x,y) >  0.2*1.000001) //USE ROBOT RADIUS 
+	{
+		//printf("%f\n", minDist * distances.cellsPerMeter());
+		if (x < 0 || y < 0 || x >= (planner_.obstacleDistances().widthInCells()) || y >= (planner_.obstacleDistances().heightInCells())) {
+            return false;
+        }
+        return true;
+    } 
+	//printf("%d,%d: %f\n", x,y,distances.operator()(x,y));
+    return false;
+}
+*/
