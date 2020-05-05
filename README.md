@@ -1,15 +1,21 @@
 # Slam and Path Planning implementation on MBot
 
-A project for ROB 550: Robotics Systems Lab course taught in University of Michigan, Ann Arbor. Due to the COVID-19 pandemic this project was migrated to an online project with two separate assignments: 
+A project for ROB 550: Robotics Systems Lab course taught in University of Michigan, Ann Arbor. Due to the COVID-19 pandemic this project was migrated to an online project. An overview of this project:
+- Acting
+    - Planar kinematics of a differential-drive ground robot
+    - Motion models with uncertainty
 
-- SLAM model
-    - Occupancy grid mapping
-    - Odometry motion model
-    - Particle Filter based sensor model (Monte Carlo Localization)
-- Path Planning
-    - Obstacle grid mapping
-    - A* path planning algorithm
-    - Frontier Exploration
+- Perception 
+    - Quadrature Encoders
+    - MEMS Inertial Measurement Unit
+    - 2D LIDAR Rangefinders
+
+- Reasoning
+    - Monte Carlo Localization
+    - Simultaneous Localization and Mapping
+    - A* search
+    - Path planning
+
 
 
 ## Running the code
