@@ -56,7 +56,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     }
 	
 	if(!distances.isCellInGrid(end.x, end.y) || !distances.isCellInGrid(startCell.x, startCell.y)){
-		printf("Start or Destination not in grid %f\n");
+		printf("Start or Destination not in grid \n");
 		path.path_length = path.path.size();
         return path;
 	}
@@ -69,7 +69,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     firstNode.fCost = 0;
     openList.push(firstNode);
 
-    bool destinationFound = false;
+    // bool destinationFound = false;
       
 
     while (!openList.empty()){
@@ -108,7 +108,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                     robot_path_t usablePath;
                     usablePath.utime = start.utime;
                     usablePath.path.push_back(start);  
-                    destinationFound = true;
+                    // destinationFound = true;
                     // printf("Found Path \n");
                     return makePath(ngbr, firstNode, initialtheta, usablePath, distances, closedList);
                 }

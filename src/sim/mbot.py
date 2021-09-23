@@ -53,7 +53,7 @@ class Mbot(pygame.sprite.Sprite):
         # Control
         self._trajectory_lock = threading.Lock()
 
-    """ View """
+    ### View ###
 
     def _render(self, space_converter):
         radius = space_converter.to_pixel(self._radius) + 1
@@ -72,7 +72,7 @@ class Mbot(pygame.sprite.Sprite):
             5
         )
 
-    """ Controller """
+    ### Controller ###
 
     def update(self, space_converter):
         # Update current pose

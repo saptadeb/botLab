@@ -6,7 +6,7 @@ from lidar import Lidar
 import geometry
 import time
 import threading
-from pygame.locals import *
+# from pygame.locals import *
 import sys
 import numpy
 import argparse
@@ -87,7 +87,7 @@ class Gui:
         self._lidar.start()
         self._running = True
 
-    """ Controller """
+    ### Controller ###
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
@@ -125,7 +125,7 @@ class Gui:
 
         self.on_cleanup()
 
-    """ Controller LCM """
+    ### Controller LCM ###
 
     def _handle_lcm(self):
         try:
@@ -142,7 +142,7 @@ class Gui:
         msg.utime = int(time.perf_counter() * 1e6)
         self._mbot.add_motor_cmd(msg)
 
-    """ View """
+    ### View ###
 
     def on_render(self):
         self._sprites.clear(self._display_surf, self._map.image)

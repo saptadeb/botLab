@@ -147,7 +147,7 @@ class Lidar(pygame.sprite.Sprite):
         msg.intensities = [0] * num_ranges
         self._lcm.publish(self._lidar_channel, msg.encode())
 
-    """ View """
+    ### View ###
 
     def _render(self, space_converter):
         self.image.fill((0, 0, 0))
