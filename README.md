@@ -1,6 +1,8 @@
 # Slam and Path Planning implementation on MBot
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/d718dc670bd54030bae4e6dc2cb1256a)](https://www.codacy.com/gh/saptadeb/botLab/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=saptadeb/botLab&amp;utm_campaign=Badge_Grade)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e4a8bdc349bb4fb3b6b5d5cc9bfe135b)](https://app.codacy.com/gh/saptadeb/botLab?utm_source=github.com&utm_medium=referral&utm_content=saptadeb/botLab&utm_campaign=Badge_Grade_Settings)
+
 A project for ROB 550: Robotics Systems Lab course taught in University of Michigan, Ann Arbor. Due to the COVID-19 pandemic this project was migrated to an online project. An overview of this project:
 - Acting
     - Planar kinematics of a differential-drive ground robot
